@@ -5,7 +5,7 @@ template_format: semantic-kernel
 description: Takes a given text and generates a concise headline or title that captures the main topic.
 
 input_variables:
-  - name: text
+  - name: pageText
     description: The text to generate a headline for
     is_required: true
 
@@ -29,6 +29,6 @@ template: |
   - Keep it concise and meaningful
 
   Text to analyze:
-  {{ $text }}
+  {{ $pageText }}
 
   Headline:

@@ -1,0 +1,47 @@
+name: json-derulo
+
+template_format: semantic-kernel
+
+description: Creates a JSON structure with page information and a concise headline summary.
+
+input_variables:
+  - name: pageNumber
+    description: The current page number
+    is_required: true
+  - name: totalPages
+    description: The total number of pages in the document
+    is_required: true
+  - name: pageText
+    description: The text content of the page to summarize
+    is_required: true
+
+output_variable:
+  description: A JSON structure containing page metadata and headline summary
+
+execution_settings:
+  default:
+    temperature: 0.3
+
+template: |
+  You are a JSON data processor that creates structured output for document pages.
+
+  Analyze the provided page text and create a JSON structure with the following format:
+
+  {
+    "pageNumber": [current page number],
+    "totalPages": [total pages in document],
+    "headline": "[short, descriptive headline of 3-8 words capturing the main topic]"
+  }
+
+  Rules for the headline:
+  - Keep it concise (3-8 words maximum)
+  - Capture the main topic or theme of the page
+  - Use title case
+  - Avoid special characters
+  - If no clear topic, use "Page Content Summary"
+
+  Page {{ $pageNumber }} of {{ $totalPages }}
+  Text to analyze:
+  {{ $pageText }}
+
+  Return only valid JSON, no additional text:

@@ -281,8 +281,10 @@ class Program
 
                     // Use AI to extract headline
                     var result = await ProcessPage(kernel, promptName, pageText, pageNumber, totalPages);
-                    
-                    Console.WriteLine($"Page {pageNumber}: {result}");
+
+                    Console.WriteLine($"Page {pageNumber}:");
+                    Console.WriteLine(result);
+                    Console.WriteLine();
                 }
                 catch (Exception ex)
                 {
@@ -322,7 +324,7 @@ class Program
         {
             var arguments = new KernelArguments()
             {
-                ["text"] = pageText,
+                ["pageText"] = pageText,
                 ["pageNumber"] = pageNumber,
                 ["totalPages"] = totalPages,
             };
