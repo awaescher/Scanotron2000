@@ -7,7 +7,7 @@
 			"command": "dotnet",
 			"args": [
 				"build",
-				"Scanotron2000.csproj"
+				"Scanotron.csproj"
 			],
 			"problemMatcher": [
 				"$tsc"
@@ -21,7 +21,7 @@
 			"args": [
 				"run",
 				"--project",
-				"Scanotron2000.csproj",
+				"Scanotron.csproj",
 				"--",
 				"--help"
 			],

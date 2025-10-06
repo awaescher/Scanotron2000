@@ -1,211 +1,93 @@
-# Scanotron 2000
+# Scanotron 2000 🚀
 
-Eine .NET 9 Console-Anwendung, die Microsoft Semantic Kernel verwendet, um mit **OpenAI-kompatiblen APIs** Headlines aus PDF-Seiten zu extrahieren.
+[![.NET 9.0](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/9.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+**Scanotron 2000** is a AI-powered pagewise PDF processing tool that extracts, analyzes, and transforms PDF content using customizable AI prompts. Built with .NET 9 and Microsoft Semantic Kernel, it supports multiple AI providers and offers specialized processing modes for different document analysis needs.
 
-- 🔍 **PDF-Verarbeitung**: Liest PDFs seitenweise mit iText7
-- 🤖 **OpenAI-kompatible API**: Universelle Unterstützung für alle OpenAI-kompatiblen Endpoints
-- 📄 **Headline-Extraktion**: Intelligente Erkennung der wichtigsten Überschriften pro Seite
-- ⚙️ **Einfache Konfiguration**: Nur Endpoint, Modell und optional API-Key
-- 🚀 **Automatische Modell-Erkennung**: Erkennt verfügbare Modelle automatisch vom Endpoint
+## 🚀 Quick Start
 
-## Unterstützte Plattformen
+### Prerequisites
 
-Alle Systeme mit **OpenAI-kompatiblen APIs**:
-- **LM Studio** (Standard): Lokale Modelle über Port 1234
-- **Ollama**: Lokale Modelle über Port 11434 
-- **OpenAI**: Original OpenAI API
-- **Azure OpenAI**: Microsoft Azure OpenAI Service
-- **Alle anderen**: Jeder Server mit `/v1/models` und `/v1/chat/completions` Endpoints
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- An AI model server (LM Studio, Ollama, etc.) or OpenAI API access
 
-## Installation
-
-### Voraussetzungen
-
-- .NET 9 SDK
-- Ein OpenAI-kompatibler Server:
-  - [LM Studio](https://lmstudio.ai/) (empfohlen für lokale Modelle)
-  - [Ollama](https://ollama.ai/) (alternative für lokale Modelle)
-  - OpenAI API Account
-  - Oder jeder andere OpenAI-kompatible Service
-
-### Klonen und Kompilieren
+### Basic Usage
 
 ```bash
-git clone <repository-url>
-cd "Scanotron 2000"
-dotnet build
+# extract headlines from each page
+dotnet run -- document.pdf --prompt headliner
+
+# find logical document breaks to split up merged documents
+dotnet run -- large-document.pdf --prompt pagebreaker
+
+# Generate JSON metadata for each page
+dotnet run -- report.pdf --prompt json-derulo
 ```
 
-## Verwendung
+## 🔧 Configuration
 
-### Einfachste Verwendung (LM Studio)
+### AI Provider Setup
 
+#### LM Studio (Default)
 ```bash
-# Automatische Modell-Erkennung
-dotnet run document.pdf
-
-# Mit spezifischem Modell
-dotnet run document.pdf --model "llama-3.2-3b-instruct"
+# Start LM Studio and load a model
+# Default endpoint: http://localhost:1234
+dotnet run -- document.pdf --prompt headliner
 ```
 
-### Andere OpenAI-kompatible Services
-
+#### Ollama
 ```bash
-# Ollama
-dotnet run document.pdf --endpoint http://localhost:11434
-
-# OpenAI (mit API Key)
-dotnet run document.pdf --endpoint https://api.openai.com/v1 --apikey your-api-key
-
-# Oder mit Umgebungsvariable
-export OPENAI_API_KEY=your-api-key
-dotnet run document.pdf --endpoint https://api.openai.com/v1
-
-# Beliebiger OpenAI-kompatibler Server
-dotnet run document.pdf --endpoint http://your-server:8080 --model your-model --apikey optional-key
+dotnet run -- document.pdf --prompt headliner --endpoint http://localhost:11434
 ```
 
-### Vollständige Optionen
-
+#### OpenAI
 ```bash
-dotnet run <pdf-file> [options]
-
-Arguments:
-  <pdf-file>        Pfad zur PDF-Datei
-
-Options:
-  --model, -m       Modellname (wird automatisch erkannt wenn nicht angegeben)
-  --endpoint, -e    API-Endpoint-URL [default: http://localhost:1234]
-  --apikey, -k      API-Schlüssel (optional, kann auch über OPENAI_API_KEY env var)
-  --help, -h        Hilfe anzeigen
+dotnet run -- document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-api-key
 ```
 
-## Konfiguration
-
-### LM Studio (Standard)
-
-1. [LM Studio herunterladen und installieren](https://lmstudio.ai/)
-2. Ein Modell in LM Studio laden
-3. LM Studio Server starten (standardmäßig auf Port 1234)
-4. Scanotron2000 verwenden - erkennt Modelle automatisch!
-
+#### Custom OpenAI-Compatible API
 ```bash
-dotnet run your-document.pdf
+dotnet run -- document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model
 ```
 
-### Ollama
+### Command Line Options
 
-1. [Ollama installieren](https://ollama.ai/)
-2. Ein Modell herunterladen: `ollama pull llama3`
-3. Ollama starten: `ollama serve`
-4. Mit Ollama verwenden:
+| Option | Short | Description | Default |
+|--------|-------|-------------|---------|
+| `--prompt` | `-p` | Prompt name (required) | - |
+| `--model` | `-m` | Model name | Auto-detected |
+| `--endpoint` | `-e` | API endpoint URL | `http://localhost:1234` |
+| `--apikey` | `-k` | API key | `API_KEY` env var |
+| `--list-prompts` | - | List available prompts | - |
+| `--help` | `-h` | Show help | - |
 
-```bash
-dotnet run document.pdf --endpoint http://localhost:11434
+## 🛠️ Custom Prompts
+
+Create custom prompts by adding YAML files to the `Prompts/` directory:
+
+```yaml
+name: your-custom-prompt
+template_format: semantic-kernel
+description: Your prompt description
+
+input_variables:
+  - name: pageText
+    description: The text content of the page
+    is_required: true
+
+execution_settings:
+  default:
+    temperature: 0.7
+
+template: |
+  Your custom prompt template here.
+  Use {{ $pageText }} to access the page content.
 ```
 
-### OpenAI
+## 🔍 How It Works
 
-```bash
-# Mit API Key als Parameter
-dotnet run document.pdf --endpoint https://api.openai.com/v1 --apikey your-key --model gpt-4
-
-# Oder mit Umgebungsvariable
-export OPENAI_API_KEY=your-key
-dotnet run document.pdf --endpoint https://api.openai.com/v1 --model gpt-4
-```
-
-### Beliebiger OpenAI-kompatibler Service
-
-Jeder Service mit diesen Endpoints funktioniert:
-- `GET /v1/models` - Liste verfügbarer Modelle
-- `POST /v1/chat/completions` - Chat-Completion API
-
-```bash
-dotnet run document.pdf --endpoint http://your-api:port --model your-model
-```
-
-## Beispiel-Ausgabe
-
-```
-🔍 Discovering available models from http://localhost:1234...
-🤖 Using first available model: llama-3.2-3b-instruct
-💡 Other available models: gpt-4o-mini, claude-3-sonnet
-
-🔍 Processing PDF: sample-document.pdf
-🤖 Using model: llama-3.2-3b-instruct from http://localhost:1234
-
-📄 Total pages: 5
-
-📄 Page 1: Introduction to Machine Learning
-📄 Page 2: Data Preprocessing Techniques
-📄 Page 3: Neural Network Architectures
-📄 Page 4: Training and Validation Methods
-📄 Page 5: Conclusion and Future Work
-```
-
-## Technische Details
-
-### Verwendete Pakete
-
-- **Microsoft.SemanticKernel** (1.65.0): AI-Integration
-- **iText7** (9.3.0): PDF-Verarbeitung
-- **iText7.BouncyCastle-Adapter** (9.3.0): Kryptografie-Unterstützung für PDF-Verarbeitung
-- **.NET 9**: Moderne C#-Features und Performance
-
-### Architektur
-
-- **Universal OpenAI-kompatibel**: Funktioniert mit jedem OpenAI-kompatiblen Service
-- **Automatische Modell-Erkennung**: Erkennt verfügbare Modelle von allen Endpoints
-- **Robuste Fehlerbehandlung**: Graceful Degradation bei API-Fehlern
-- **Token-Management**: Automatische Textkürzung für Token-Limits
-- **Einfache Konfiguration**: Nur 3 Parameter: Endpoint, Modell, API-Key (optional)
-
-## Entwicklung
-
-### DevExpress Integration
-
-Um DevExpress DocumentProcessor zu verwenden (falls verfügbar):
-
-1. DevExpress Lizenz und Pakete installieren
-2. `iText7` durch DevExpress-Pakete ersetzen
-3. PDF-Verarbeitungslogik anpassen
-
-### Erweiterte Features
-
-- Batch-Verarbeitung mehrerer PDFs
-- Ausgabe in verschiedene Formate (JSON, XML, CSV)
-- Konfigurierbare Prompts für verschiedene Anwendungsfälle
-- OCR-Unterstützung für gescannte PDFs
-
-## Troubleshooting
-
-### Häufige Probleme
-
-1. **"OPENAI_API_KEY environment variable is required"**
-   - Umgebungsvariable für den gewählten Provider setzen
-
-2. **"PDF file not found"**
-   - Pfad zur PDF-Datei überprüfen
-
-3. **"AI extraction failed"**
-   - Provider-Verfügbarkeit prüfen (Ollama läuft, API-Keys gültig)
-   - Netzwerkverbindung überprüfen
-
-### Debug-Modus
-
-Für detailliertere Fehlerinformationen kann das Projekt im Debug-Modus gestartet werden:
-
-```bash
-dotnet run --configuration Debug document.pdf
-```
-
-## Lizenz
-
-[Lizenz hier einfügen]
-
-## Beitragen
-
-Contributions sind willkommen! Bitte erstellen Sie einen Pull Request oder Issue für Vorschläge und Verbesserungen.
+1. **PDF Text Extraction**: Uses iText7 to extract text content from PDF pages
+2. **AI Processing**: Sends extracted text to AI models via OpenAI-compatible APIs
+3. **Prompt Application**: Applies specialized prompts using Microsoft Semantic Kernel
+4. **Result Output**: Returns processed results based on the selected prompt
