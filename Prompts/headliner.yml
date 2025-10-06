@@ -1,0 +1,34 @@
+name: headliner
+
+template_format: semantic-kernel
+
+description: Takes a given text and generates a concise headline or title that captures the main topic.
+
+input_variables:
+  - name: text
+    description: The text to generate a headline for
+    is_required: true
+
+output_variable:
+  description: The headline for a given text
+
+execution_settings:
+  default:
+    temperature: 0.5
+
+template: |
+  You are an expert at extracting the main headline or title from document pages. 
+
+  Analyze the following text which is part of a PDF document and extract the most prominent headline, title, or main topic.
+
+  Rules:
+  - Return only the headline/title, nothing else
+  - If there are multiple headings, choose the most prominent one
+  - If no clear headline exists, create a brief descriptive title (max 10 words)
+  - Remove any formatting characters or excessive whitespace
+  - Keep it concise and meaningful
+
+  Text to analyze:
+  {{ $text }}
+
+  Headline:
