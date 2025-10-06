@@ -29,6 +29,12 @@ class Program
             return 0;
         }
 
+        if (args[0] == "--list-prompts")
+        {
+            ListAvailablePrompts();
+            return 0;
+        }
+
         string pdfPath = args[0];
         string? specifiedModel = GetArgValue(args, "--model", "-m");
         string? promptName = GetArgValue(args, "--prompt", "-p");
@@ -80,36 +86,62 @@ class Program
 
     static void ShowHelp()
     {
-        Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
-        Console.WriteLine();
-        Console.WriteLine("Usage: Scanotron2000 <pdf-file> --prompt <prompt-name> [options]");
-        Console.WriteLine();
-        Console.WriteLine("Arguments:");
-        Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
-        Console.WriteLine();
-        Console.WriteLine("Options:");
-        Console.WriteLine("  --prompt, -p      Prompt name (required) - available: headliner");
-        Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
-        Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
-        Console.WriteLine("  --apikey, -k      API key (optional, can also use API_KEY env var)");
-        Console.WriteLine("  --help, -h        Show this help");
-        Console.WriteLine();
-        Console.WriteLine("Examples:");
-        Console.WriteLine("  # LM Studio (default)");
-        Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner");
-        Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --model \"llama-3.2-3b-instruct\"");
-        Console.WriteLine();
-        Console.WriteLine("  # Ollama");
-        Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint http://localhost:11434");
-        Console.WriteLine();
-        Console.WriteLine("  # OpenAI");
-        Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
-        Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
-        Console.WriteLine();
-        Console.WriteLine("  # Any OpenAI-compatible API");
-        Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
-        Console.WriteLine();
-        Console.WriteLine("Note: When no model is specified, the first available model will be used automatically.");
+        try
+        {
+            var kernel = CreateKernel("dummy-model", "http://localhost:1234", null);
+            var availablePrompts = GetAvailablePromptsFromKernel(kernel);
+            var promptsList = availablePrompts.Count > 0 ? string.Join(", ", availablePrompts) : "No prompts found";
+            
+            Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
+            Console.WriteLine();
+            Console.WriteLine("Usage: Scanotron2000 <pdf-file> --prompt <prompt-name> [options]");
+            Console.WriteLine();
+            Console.WriteLine("Arguments:");
+            Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine($"  --prompt, -p      Prompt name (required) - available: {promptsList}");
+            Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
+            Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
+            Console.WriteLine("  --apikey, -k      API key (optional, can also use API_KEY env var)");
+            Console.WriteLine("  --list-prompts    List all available prompts and their descriptions");
+            Console.WriteLine("  --help, -h        Show this help");
+            Console.WriteLine();
+            Console.WriteLine("Examples:");
+            Console.WriteLine("  # LM Studio (default)");
+            Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner");
+            Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --model \"llama-3.2-3b-instruct\"");
+            Console.WriteLine();
+            Console.WriteLine("  # Ollama");
+            Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint http://localhost:11434");
+            Console.WriteLine();
+            Console.WriteLine("  # OpenAI");
+            Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
+            Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
+            Console.WriteLine();
+            Console.WriteLine("  # Any OpenAI-compatible API");
+            Console.WriteLine("  Scanotron2000 document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
+            Console.WriteLine();
+            Console.WriteLine("Note: When no model is specified, the first available model will be used automatically.");
+        }
+        catch
+        {
+            // Fallback if kernel creation fails
+            Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
+            Console.WriteLine();
+            Console.WriteLine("Usage: Scanotron2000 <pdf-file> --prompt <prompt-name> [options]");
+            Console.WriteLine();
+            Console.WriteLine("Arguments:");
+            Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("  --prompt, -p      Prompt name (required)");
+            Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
+            Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
+            Console.WriteLine("  --apikey, -k      API key (optional, can also use API_KEY env var)");
+            Console.WriteLine("  --list-prompts    List all available prompts and their descriptions");
+            Console.WriteLine("  --help, -h        Show this help");
+        }
     }
 
     static string? GetArgValue(string[] args, params string[] argNames)
@@ -122,6 +154,62 @@ class Program
             }
         }
         return null;
+    }
+
+    static List<string> GetAvailablePrompts()
+    {
+        try
+        {
+            var kernel = CreateKernel("dummy-model", "http://localhost:1234", null);
+            return GetAvailablePromptsFromKernel(kernel);
+        }
+        catch
+        {
+            return new List<string>();
+        }
+    }
+
+    static List<string> GetAvailablePromptsFromKernel(Kernel kernel)
+    {
+        try
+        {
+            var promptsPlugin = kernel.Plugins["Prompts"];
+            return promptsPlugin.Select(f => f.Name).ToList();
+        }
+        catch
+        {
+            return new List<string>();
+        }
+    }
+
+    static void ListAvailablePrompts()
+    {
+        Console.WriteLine("Available Prompts:");
+        Console.WriteLine("==================");
+        Console.WriteLine();
+
+        try
+        {
+            var kernel = CreateKernel("dummy-model", "http://localhost:1234", null);
+            var promptsPlugin = kernel.Plugins["Prompts"];
+            
+            if (!promptsPlugin.Any())
+            {
+                Console.WriteLine("❌ No prompt functions found in the Prompts plugin.");
+                return;
+            }
+
+            foreach (var function in promptsPlugin)
+            {
+                Console.WriteLine($"📝 {function.Name}");
+                Console.WriteLine($"   {function.Description ?? "No description available"}");
+                Console.WriteLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error loading prompts: {ex.Message}");
+        }
     }
 
     static async Task<List<string>> GetAvailableModelsAsync(string endpoint, string? apiKey)
