@@ -1,0 +1,62 @@
+name: pagebreaker
+
+template_format: semantic-kernel
+
+description: Detects when a PDF page represents a new document section that should be split from the previous content.
+
+input_variables:
+  - name: previousPageText
+    description: The text content of the previous PDF page
+    is_required: true
+  - name: pageText
+    description: The text content of the current PDF page
+    is_required: true
+
+output_variable:
+  description: Either "NEWDOC" if pages should be split or empty if they belong together
+
+execution_settings:
+  default:
+    temperature: 0.1
+
+template: |
+  You are a document segmentation specialist. Your task is to determine if the current PDF page represents the beginning of a COMPLETELY DIFFERENT document that should be split from the previous content.
+
+  This is used to automatically break up large 200+ page PDFs into smaller, logical document chunks.
+
+  IMPORTANT:
+  You should be VERY CONSERVATIVE and only output "NEWDOC" when you are absolutely certain that this is a completely different document type or source.
+
+  Analyze the previous page and current page content to detect document boundaries.
+
+  Output "NEWDOC" ONLY if you detect ALL of these conditions:
+  - Completely different document type (e.g. insurance document → tax return → bank statement)
+  - Different organization/company as the document issuer
+  - Different document purpose/function
+  - Clear evidence this is NOT a continuation of the same document
+
+  Examples of when to output "NEWDOC":
+  - Previous page: Insurance policy → Current page: Tax office tax return
+  - Previous page: Bank statement → Current page: Employment contract
+  - Previous page: Medical report → Current page: Invoice from different company
+
+  DO NOT output "NEWDOC" for:
+  - Different pages of the same document (even if different sections)
+  - Same document type from same organization
+  - Continuation pages, appendices, or attachments of the same document
+  - Different sections within the same document (e.g. different chapters)
+  - Same company but different products (still same organization)
+
+  You can only return "NEWDOC" or an empty response. No other text.
+
+  Previous page text:
+  ```
+  {{ $previousPageText }}
+  ```
+
+  Current page text:
+  ```
+  {{ $pageText }}
+  ```
+
+  Decision:

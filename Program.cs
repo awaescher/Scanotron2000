@@ -264,6 +264,8 @@ class Program
             Console.WriteLine($"📄 Total pages: {totalPages}");
             Console.WriteLine();
 
+            var previousPageText = string.Empty;
+
             for (int pageNumber = 1; pageNumber <= totalPages; pageNumber++)
             {
                 try
@@ -276,15 +278,19 @@ class Program
                     if (string.IsNullOrWhiteSpace(pageText))
                     {
                         Console.WriteLine($"📄 Page {pageNumber}: [No extractable text found]");
+                        previousPageText = pageText; // Update for next iteration
                         continue;
                     }
 
                     // Use AI to extract headline
-                    var result = await ProcessPage(kernel, promptName, pageText, pageNumber, totalPages);
+                    var result = await ProcessPage(kernel, promptName, pageText, pageNumber, totalPages, previousPageText);
 
                     Console.WriteLine($"Page {pageNumber}:");
                     Console.WriteLine(result);
                     Console.WriteLine();
+
+                    // Store current page text for next iteration
+                    previousPageText = pageText;
                 }
                 catch (Exception ex)
                 {
@@ -318,7 +324,7 @@ class Program
         return builder.Build();
     }
 
-    static async Task<string> ProcessPage(Kernel kernel, string promptName, string pageText, int pageNumber, int totalPages)
+    static async Task<string> ProcessPage(Kernel kernel, string promptName, string pageText, int pageNumber, int totalPages, string previousPageText)
     {
         try
         {
@@ -327,6 +333,7 @@ class Program
                 ["pageText"] = pageText,
                 ["pageNumber"] = pageNumber,
                 ["totalPages"] = totalPages,
+                ["previousPageText"] = previousPageText 
             };
 
             // Get the function from the kernel and invoke it

@@ -1,0 +1,40 @@
+name: context-king
+
+template_format: semantic-kernel
+
+description: Extracts the 10 most important data points from a PDF page as key-value pairs.
+
+input_variables:
+  - name: pageText
+    description: The text content of the PDF page to extract data from
+    is_required: true
+
+output_variable:
+  description: Key-value pairs of the most important data from the page
+
+execution_settings:
+  default:
+    temperature: 0.2
+
+template: |
+  You are an expert data extraction specialist. Your task is to analyze the provided PDF page text and extract the 10 most important data points as key-value pairs.
+
+  Guidelines for extraction:
+  - Focus on concrete facts, numbers, dates, names, and specific information
+  - Prioritize information that would be most valuable for understanding the document
+  - Use clear, descriptive keys in German or English
+  - Keep values concise but complete
+  - Include dates, amounts, percentages, names, addresses, reference numbers, etc.
+  - If there are fewer than 10 important data points, extract all available ones
+  - Skip generic text and focus on specific, actionable information
+
+  Format your response as a simple list of key-value pairs, one per line:
+  Key1: Value1
+  Key2: Value2
+  Key3: Value3
+  ...
+
+  Text to analyze:
+  {{ $pageText }}
+
+  Extracted data points:
