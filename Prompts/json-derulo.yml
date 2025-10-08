@@ -8,7 +8,7 @@ input_variables:
   - name: pageNumber
     description: The current page number
     is_required: true
-  - name: totalPages
+  - name: pageCount
     description: The total number of pages in the document
     is_required: true
   - name: pageText
@@ -29,7 +29,7 @@ template: |
 
   {
     "pageNumber": [current page number],
-    "totalPages": [total pages in document],
+    "pageCount": [total pages in document],
     "headline": "[short, descriptive headline of 3-8 words capturing the main topic]"
   }
 
@@ -40,7 +40,7 @@ template: |
   - Avoid special characters
   - If no clear topic, use "Page Content Summary"
 
-  Page {{ $pageNumber }} of {{ $totalPages }}
+  Page {{ $pageNumber }} of {{ $pageCount }}
   Text to analyze:
   {{ $pageText }}
 

@@ -22,14 +22,21 @@ Self compiled
 ### Basic Usage
 
 ```bash
-# extract headlines from each page
+# Extract headlines from each page
 ./scanotron document.pdf --prompt headliner
 
-# find logical document breaks to split up merged documents
+# Use custom direct prompts (no predefined template needed)
+./scanotron document.pdf --prompt "Summarize the main points in bullet format"
+
+# Find logical document breaks to split up merged documents
 ./scanotron large-document.pdf --prompt pagebreaker
 
 # Generate JSON metadata for each page
 ./scanotron report.pdf --prompt json-derulo
+
+# Clean output without informational messages
+./scanotron document.pdf --prompt headliner --no-intro
+
 ```
 
 Running a self compiled version from source code requires `dotnet run --` instead of `scanotron`.
@@ -71,14 +78,69 @@ dotnet run -- document.pdf --prompt headliner
 
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
-| `--prompt` | `-p` | Prompt name (required) | - |
+| `--prompt` | `-p` | Prompt name or direct prompt text (required) | - |
+| `--format` | `-f` | Output format template with .NET formatting | `Page {pageNumber}:\n{answer}\n` |
+| `--no-intro` | - | Suppress all informational output | - |
 | `--model` | `-m` | Model name | Auto-detected |
 | `--endpoint` | `-e` | API endpoint URL | `http://localhost:1234` |
 | `--apikey` | `-k` | API key | `API_KEY` env var |
 | `--list-prompts` | - | List available prompts | - |
 | `--help` | `-h` | Show help | - |
 
-## 🛠️ Custom Prompts
+#### Format Template Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `{pageNumber}` | Current page number | `1` |
+| `{pageCount}` | Total number of pages | `42` |
+| `{pageText}` | Raw text content of the page | Full page text |
+| `{previousPageText}` | Text content of the previous page | Previous page text |
+| `{answer}` | AI-generated response | AI output |
+
+The format template supports standard .NET string formatting for numeric values.
+
+## � Advanced Features
+
+### Direct Prompt Mode
+Instead of using predefined prompt templates, you can provide direct prompt text:
+
+```bash
+# Direct German prompt
+./scanotron document.pdf --prompt "Fasse den Inhalt dieser Seite in einem Satz zusammen"
+
+# Direct analysis prompt  
+./scanotron document.pdf --prompt "Extract all phone numbers and email addresses from this page"
+
+# Direct translation prompt
+./scanotron document.pdf --prompt "Translate this text to French"
+```
+
+### Output Formatting
+Customize the output format using template variables and .NET formatting:
+
+```bash
+# Professional report format
+./scanotron document.pdf --prompt headliner --format "Page {pageNumber} of {pageCount}: {answer}\n\n"
+
+# Minimal clean output
+./scanotron document.pdf --prompt headliner --format "{answer}\n" --no-intro
+
+# CSV-like format (escape commas in content)
+./scanotron document.pdf --prompt headliner --format "{pageNumber},{answer}\n" --no-intro
+```
+
+### Silent Processing
+Use `--no-intro` for clean output suitable for automation and piping:
+
+```bash
+# Pipe to file
+./scanotron document.pdf --prompt headliner --no-intro > results.txt
+
+# Use in scripts
+HEADLINES=$(./scanotron document.pdf --prompt headliner --format "{answer} " --no-intro)
+```
+
+## �🛠️ Custom Prompts
 
 Create custom prompts by adding YAML files to the `Prompts/` directory:
 
