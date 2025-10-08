@@ -102,7 +102,7 @@ class Program
 			var availablePrompts = GetAvailablePromptsFromKernel(kernel);
 			var promptsList = availablePrompts.Count > 0 ? string.Join(", ", availablePrompts) : "No prompts found";
 
-			Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
+			Console.WriteLine("Scanotron 2000 - Throw local or hosted LLMs against pdf pages.");
 			Console.WriteLine();
 			Console.WriteLine("Usage: scanotron <pdf-file> --prompt <prompt-name> [options]");
 			Console.WriteLine();
