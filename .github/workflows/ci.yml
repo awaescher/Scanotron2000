@@ -75,31 +75,19 @@ jobs:
       run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
-    - name: Create macOS App Bundles
+    - name: Sign macOS binaries
       run: |
-        # Create .app bundles for self-contained versions
-        mkdir -p ./publish/scanotron.app/Contents/MacOS
-        mkdir -p ./publish/scanotron-intel.app/Contents/MacOS
-        
-        # Copy binaries
-        cp ./publish/osx-arm64/scanotron ./publish/scanotron.app/Contents/MacOS/scanotron
-        cp ./publish/osx-x64/scanotron ./publish/scanotron-intel.app/Contents/MacOS/scanotron
-        
-        # Make binaries executable
-        chmod +x ./publish/scanotron.app/Contents/MacOS/scanotron
-        chmod +x ./publish/scanotron-intel.app/Contents/MacOS/scanotron
-        
-        # Create Info.plist files from template
-        sed 's/{{VERSION}}/${{steps.gitversion.outputs.semVer}}/g' .github/templates/Info.plist.template > ./publish/scanotron.app/Contents/Info.plist
-        sed 's/{{VERSION}}/${{steps.gitversion.outputs.semVer}}/g' .github/templates/Info.plist.template > ./publish/scanotron-intel.app/Contents/Info.plist
-        
-        # Ad-hoc code signing (works without Developer ID)
-        codesign --force --deep --sign - ./publish/scanotron.app || echo "Code signing failed, but continuing..."
-        codesign --force --deep --sign - ./publish/scanotron-intel.app || echo "Code signing failed, but continuing..."
+        # Ad-hoc code signing for macOS binaries (works without Developer ID)
+        codesign --force --sign - ./publish/osx-arm64/scanotron || echo "Code signing failed for ARM64, but continuing..."
+        codesign --force --sign - ./publish/osx-intel-x64/scanotron || echo "Code signing failed for Intel, but continuing..."
         
         # Verify signing
-        codesign --verify --verbose ./publish/scanotron.app || echo "Verification failed for ARM64 app"
-        codesign --verify --verbose ./publish/scanotron-intel.app || echo "Verification failed for Intel app"
+        codesign --verify --verbose ./publish/osx-arm64/scanotron || echo "Verification failed for ARM64"
+        codesign --verify --verbose ./publish/osx-intel-x64/scanotron || echo "Verification failed for Intel"
+        
+        # Also sign framework-dependent versions
+        codesign --force --sign - ./publish/osx-arm64-framework-dependent/scanotron || echo "Code signing failed for ARM64 framework-dependent, but continuing..."
+        codesign --force --sign - ./publish/osx-intel-x64-framework-dependent/scanotron || echo "Code signing failed for Intel framework-dependent, but continuing..."
       if: github.event_name != 'pull_request'
 
     - name: Create ZIP archives
@@ -114,10 +102,6 @@ jobs:
         tar -czf ../scanotron-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64-framework-dependent .
         tar -czf ../scanotron-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-intel-x64-framework-dependent .
         tar -czf ../scanotron-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64-framework-dependent .
-        
-        # macOS App Bundle archives (easier for users)
-        zip -r ../scanotron-macOS-ARM64-${{steps.gitversion.outputs.semVer}}.zip scanotron.app/
-        zip -r ../scanotron-macOS-Intel-${{steps.gitversion.outputs.semVer}}.zip scanotron-intel.app/
       if: github.event_name != 'pull_request'
 
     - name: Create a GitHub release
@@ -134,19 +118,10 @@ jobs:
           scanotron-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
           scanotron-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
           scanotron-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
-          scanotron-macOS-ARM64-${{steps.gitversion.outputs.semVer}}.zip
-          scanotron-macOS-Intel-${{steps.gitversion.outputs.semVer}}.zip
         body: |
           ## Release ${{steps.gitversion.outputs.semVer}}
           
-          ### Easy macOS Installation (Recommended for macOS users)
-          **Ready-to-use .app bundles - Just download, unzip, and double-click!**
-          - **macOS Apple Silicon (M1/M2/M3)**: `scanotron-macOS-ARM64-${{steps.gitversion.outputs.semVer}}.zip`
-          - **macOS Intel**: `scanotron-macOS-Intel-${{steps.gitversion.outputs.semVer}}.zip`
-          
-          *These are proper macOS applications that should work without security warnings!*
-          
-          ### Self-Contained Downloads (All platforms)
+          ### Self-Contained Downloads (Recommended for most users)
           **Single executable file - No .NET installation required - Ready to run immediately**
           - **Windows x64**: `scanotron-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip`
           - **Linux x64**: `scanotron-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
@@ -162,8 +137,9 @@ jobs:
           
           ---
           
+          **macOS users**: The binaries are now code-signed and should run without security warnings!
+          
           **Which version should I choose?**
-          - **macOS users**: Use the "Easy macOS Installation" .app bundles above for the best experience
           - **Self-contained**: Choose this if you want the easiest setup. Single executable file (~50-100MB) that works immediately
           - **Framework-dependent**: Choose this if you have .NET 9.0 installed. Smaller download (~5-20MB) but requires [.NET 9.0 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0)
       if: github.event_name != 'pull_request'
