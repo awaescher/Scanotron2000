@@ -1,0 +1,68 @@
+name: document-type-detector
+
+template_format: semantic-kernel
+
+description: Automatically detects and classifies the type of document based on content, structure, and typical document patterns.
+
+input_variables:
+  - name: pageText
+    description: The text content to analyze for document type detection
+    is_required: true
+
+output_variable:
+  description: Detected document type with confidence score and supporting evidence
+
+execution_settings:
+  default:
+    temperature: 0.2
+
+template: |
+  You are a document classification expert. Your task is to analyze the provided text and determine what type of document this represents.
+
+  Common document types to consider:
+  - INVOICE/BILL: Billing documents with itemized charges
+  - CONTRACT: Legal agreements, terms and conditions
+  - REPORT: Business reports, financial statements, analysis
+  - CORRESPONDENCE: Letters, emails, memos
+  - FORM: Application forms, questionnaires, surveys
+  - MANUAL: User guides, instructions, procedures
+  - LEGAL_DOCUMENT: Court documents, legal filings, regulations
+  - FINANCIAL_STATEMENT: Balance sheets, income statements, bank statements
+  - CERTIFICATE: Diplomas, licenses, certifications
+  - PROPOSAL: Business proposals, project plans, quotes
+  - PRESENTATION: Slides, presentation materials
+  - POLICY: Company policies, terms of service, privacy policies
+  - MEDICAL_RECORD: Health records, medical reports, prescriptions
+  - TECHNICAL_SPEC: Technical documentation, specifications
+  - OTHER: If it doesn't fit standard categories
+
+  Look for key indicators:
+  - Document structure and formatting
+  - Specific terminology and language patterns
+  - Typical sections or fields for each document type
+  - Headers, footers, and standard elements
+  - Purpose and intended audience
+
+  Format your response as:
+  DOCUMENT TYPE DETECTION:
+  
+  Primary Type: [DOCUMENT_TYPE]
+  Confidence Score: [0-100]%
+  
+  Secondary Type (if applicable): [DOCUMENT_TYPE]
+  Secondary Confidence: [0-100]%
+  
+  Supporting Evidence:
+  - [Evidence 1]: [Why this indicates the document type]
+  - [Evidence 2]: [Why this indicates the document type]
+  - [Evidence 3]: [Why this indicates the document type]
+  
+  Key Characteristics:
+  - Purpose: [What this document is intended to accomplish]
+  - Audience: [Who is the intended reader]
+  - Formality Level: [Formal/Semi-formal/Informal]
+
+  Text to analyze:
+  {{ $pageText }}
+
+  Document Type Analysis:

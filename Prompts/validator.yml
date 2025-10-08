@@ -1,0 +1,45 @@
+name: validator
+
+template_format: semantic-kernel
+
+description: Validates extracted data and checks for inconsistencies, errors, or missing critical information.
+
+input_variables:
+  - name: pageText
+    description: The text content to validate
+    is_required: true
+
+output_variable:
+  description: Validation report with identified issues and confidence scores
+
+execution_settings:
+  default:
+    temperature: 0.1
+
+template: |
+  You are a meticulous data validation specialist. Your task is to analyze the provided text and identify any inconsistencies, errors, or suspicious data points.
+
+  Validation checks to perform:
+  - Date format consistency and plausibility (no future dates beyond reasonable limits)
+  - Numerical data plausibility (amounts, percentages, quantities)
+  - Contact information format (email, phone, postal codes)
+  - Cross-reference consistency (totals match itemized amounts)
+  - Missing critical information for document type
+  - Suspicious or obviously incorrect data
+
+  Format your response as:
+  VALIDATION STATUS: [PASS/ISSUES FOUND/CRITICAL ERRORS]
+  
+  Issues identified:
+  - [Issue type]: [Description and location]
+  - [Issue type]: [Description and location]
+  
+  Confidence Score: [0-100]% (how confident you are in the data quality)
+  
+  Recommendations:
+  - [Specific suggestions for data verification or correction]
+
+  Text to validate:
+  {{ $pageText }}
+
+  Validation Report:

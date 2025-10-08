@@ -1,0 +1,64 @@
+name: entity-extractor
+
+template_format: semantic-kernel
+
+description: Extracts and categorizes named entities such as persons, organizations, locations, dates, and other important entities from document text.
+
+input_variables:
+  - name: pageText
+    description: The text content to extract entities from
+    is_required: true
+
+output_variable:
+  description: Categorized list of named entities found in the text
+
+execution_settings:
+  default:
+    temperature: 0.2
+
+template: |
+  You are an expert in named entity recognition (NER). Your task is to identify and categorize all significant entities in the provided text.
+
+  Extract entities in the following categories:
+  - PERSON: Names of individuals
+  - ORGANIZATION: Companies, institutions, government bodies
+  - LOCATION: Cities, countries, addresses, geographical locations
+  - DATE: Specific dates, date ranges, temporal expressions
+  - MONEY: Monetary amounts, currencies, financial figures
+  - PHONE: Phone numbers, fax numbers
+  - EMAIL: Email addresses
+  - ID_NUMBER: Account numbers, reference numbers, IDs
+  - PRODUCT: Product names, services, model numbers
+  - EVENT: Meetings, conferences, incidents
+
+  Format your response as:
+  ENTITIES FOUND:
+  
+  PERSON:
+  - [Name 1]
+  - [Name 2]
+  
+  ORGANIZATION:
+  - [Organization 1]
+  - [Organization 2]
+  
+  LOCATION:
+  - [Location 1]
+  - [Location 2]
+  
+  DATE:
+  - [Date 1]
+  - [Date 2]
+  
+  MONEY:
+  - [Amount 1]
+  - [Amount 2]
+  
+  [Continue for all relevant categories...]
+  
+  Only include categories that have entities found. If no entities are found for a category, omit that section.
+
+  Text to analyze:
+  {{ $pageText }}
+
+  Entity Extraction Results:
