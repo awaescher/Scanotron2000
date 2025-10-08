@@ -46,14 +46,14 @@ class Program
 
 		if (!File.Exists(pdfPath))
 		{
-			Console.WriteLine($"❌ Error: PDF file '{pdfPath}' not found.");
+			Console.Error.WriteLine($"❌ Error: PDF file '{pdfPath}' not found.");
 			return 1;
 		}
 
 		if (string.IsNullOrEmpty(promptName))
 		{
-			Console.WriteLine("❌ Error: The --prompt parameter is required.");
-			Console.WriteLine("💡 Example: scanotron document.pdf --prompt headliner");
+			Console.Error.WriteLine("❌ Error: The --prompt parameter is required.");
+			Console.Error.WriteLine("💡 Example: scanotron document.pdf --prompt headliner");
 			return 1;
 		}
 
@@ -69,7 +69,7 @@ class Program
 
 			if (availableModels.Count == 0)
 			{
-				Console.WriteLine($"❌ No models found at {endpoint}. Please specify a model with --model or start your model server.");
+				Console.Error.WriteLine($"❌ No models found at {endpoint}. Please specify a model with --model or start your model server.");
 				return 1;
 			}
 
@@ -113,8 +113,8 @@ class Program
 			Console.WriteLine($"  --prompt, -p      Prompt name or direct prompt text - available: {promptsList}");
 			Console.WriteLine("                    Can be a prompt name (e.g., 'headliner') or direct text (e.g., 'summarize this')");
 			Console.WriteLine("  --format, -f      Output format template [default: 'Page {pageNumber}:\\n{answer}\\n']");
-			Console.WriteLine("                    Variables: {pageNumber}, {pageCount}, {pageText}, {previousPageText}, {answer}");
-			Console.WriteLine("                    Supports .NET formatting: {pageNumber:D3}, {pageCount:N0}, etc.");
+			Console.WriteLine("                    Variables: {pageNumber}, {pageCount}, {pageText}, {previousPageText}, {answer}, {date}, {time}, {totalDuration}, {pageDuration}");
+			Console.WriteLine("                    Supports .NET format strings: {pageNumber:D3}, {date:yyyy-MM-dd}, {totalDuration:mm\\:ss}, etc.");
 			Console.WriteLine("  --no-intro        Suppress all informational output, only show results");
 			Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
 			Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
@@ -129,9 +129,12 @@ class Program
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Seite {pageNumber}: {answer}\"");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --no-intro");
 			Console.WriteLine();
-			Console.WriteLine("  # Advanced formatting");
+			Console.WriteLine("  # Advanced formatting with .NET format strings");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber:D3}/{pageCount:D3}: {answer}\"");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"{pageNumber:D2}. {answer}\\n\"");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Seite {pageNumber:00}/{pageCount:00}: {answer}\"");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"[{date:yyyy-MM-dd} {time:HH:mm}] Page {pageNumber}: {answer}\"");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber} ({pageDuration:ss\\.fff}s, total: {totalDuration:mm\\:ss}): {answer}\"");
 			Console.WriteLine();
 			Console.WriteLine("  # Ollama");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint http://localhost:11434");
@@ -183,7 +186,7 @@ class Program
 		return args.Any(arg => flagNames.Contains(arg));
 	}
 
-	static string FormatOutputString(string template, int pageNumber, int pageCount, string pageText, string previousPageText, string answer)
+	static string FormatOutputString(string template, int pageNumber, int pageCount, string pageText, string previousPageText, string answer, TimeSpan totalDuration, TimeSpan pageDuration)
 	{
 		try
 		{
@@ -192,27 +195,48 @@ class Program
 							 .Replace("\\t", "\t")
 							 .Replace("\\r", "\r");
 
-			// Use string.Format with indexed placeholders for .NET formatting support
-			// This allows formats like {0:D3} for zero-padded numbers, {0:C} for currency, etc.
-			var formattedString = string.Format(template
-				.Replace("{pageNumber}", "{0}")
-				.Replace("{pageCount}", "{1}")
-				.Replace("{pageText}", "{2}")
-				.Replace("{previousPageText}", "{3}")
-				.Replace("{answer}", "{4}"),
-				pageNumber, pageCount, pageText, previousPageText, answer);
+			// Get current date/time for formatting
+			var now = DateTime.Now;
+
+			// Use regex to replace variable names with indexed placeholders while preserving format specifiers
+			// This allows formats like {pageNumber:D3}, {pageCount:N0}, {date:yyyy-MM-dd}, {totalDuration:mm\\:ss}, etc.
+			var formatTemplate = System.Text.RegularExpressions.Regex.Replace(template, @"\{pageNumber(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{0:{match.Groups[1].Value}}}" : "{0}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageCount(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{1:{match.Groups[1].Value}}}" : "{1}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageText(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{2:{match.Groups[1].Value}}}" : "{2}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{previousPageText(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{3:{match.Groups[1].Value}}}" : "{3}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{answer(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{4:{match.Groups[1].Value}}}" : "{4}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{date(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{5:{match.Groups[1].Value}}}" : "{5}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{time(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{6:{match.Groups[1].Value}}}" : "{6}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{totalDuration(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{7:{match.Groups[1].Value}}}" : "{7}");
+			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageDuration(?::([^}]*))?\}", match =>
+				match.Groups[1].Success ? $"{{8:{match.Groups[1].Value}}}" : "{8}");
+
+			var formattedString = string.Format(formatTemplate, pageNumber, pageCount, pageText, previousPageText, answer, now, now, totalDuration, pageDuration);
 
 			return formattedString;
 		}
 		catch (FormatException)
 		{
 			// Fallback to simple replacement if format string is invalid
+			var now = DateTime.Now;
 			return template
 				.Replace("{pageNumber}", pageNumber.ToString())
 				.Replace("{pageCount}", pageCount.ToString())
 				.Replace("{pageText}", pageText)
 				.Replace("{previousPageText}", previousPageText)
 				.Replace("{answer}", answer)
+				.Replace("{date}", now.ToString("yyyy-MM-dd"))
+				.Replace("{time}", now.ToString("HH:mm:ss"))
+				.Replace("{totalDuration}", totalDuration.ToString(@"mm\:ss"))
+				.Replace("{pageDuration}", pageDuration.ToString(@"ss\.fff"))
 				.Replace("\\n", "\n")
 				.Replace("\\t", "\t")
 				.Replace("\\r", "\r");
@@ -303,13 +327,15 @@ class Program
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"⚠️  Could not fetch models from {endpoint}: {ex.Message}");
+			Console.Error.WriteLine($"⚠️  Could not fetch models from {endpoint}: {ex.Message}");
 			return new List<string>();
 		}
 	}
 
 	static async Task ProcessPdfAsync(FileInfo pdfFile, string promptName, string? outputFormat, bool noIntro, string model, string endpoint, string? apiKey)
 	{
+		var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
+		
 		try
 		{
 			if (!noIntro)
@@ -373,6 +399,8 @@ class Program
 
 			for (int pageNumber = 1; pageNumber <= pageCount; pageNumber++)
 			{
+				var pageStopwatch = System.Diagnostics.Stopwatch.StartNew();
+				
 				try
 				{
 					// Extract text from current page
@@ -384,7 +412,7 @@ class Program
 					{
 						if (!noIntro)
 						{
-							Console.WriteLine($"📄 Page {pageNumber}: [No extractable text found]");
+							Console.Error.WriteLine($"⚠️  Page {pageNumber}: [No extractable text found]");
 						}
 						previousPageText = pageText; // Update for next iteration
 						continue;
@@ -393,8 +421,10 @@ class Program
 					// Use AI to extract headline
 					var result = await ProcessPage(kernel, promptName, isPromptName, pageText, pageNumber, pageCount, previousPageText);
 
+					pageStopwatch.Stop();
+
 					// Format output using the specified template with .NET string formatting support
-					var formattedOutput = FormatOutputString(outputFormat, pageNumber, pageCount, pageText, previousPageText, result);
+					var formattedOutput = FormatOutputString(outputFormat, pageNumber, pageCount, pageText, previousPageText, result, totalStopwatch.Elapsed, pageStopwatch.Elapsed);
 
 					Console.Write(formattedOutput);
 
@@ -403,19 +433,18 @@ class Program
 				}
 				catch (Exception ex)
 				{
-					if (!noIntro)
-					{
-						Console.WriteLine($"❌ Error processing page {pageNumber}: {ex.Message}");
-					}
+					pageStopwatch.Stop();
+					Console.Error.WriteLine($"❌ Error processing page {pageNumber}: {ex.Message}");
 				}
 			}
 		}
 		catch (Exception ex)
 		{
-			if (!noIntro)
-			{
-				Console.WriteLine($"❌ Error processing PDF: {ex.Message}");
-			}
+			Console.Error.WriteLine($"❌ Error processing PDF: {ex.Message}");
+		}
+		finally
+		{
+			totalStopwatch.Stop();
 		}
 	}
 
@@ -471,7 +500,7 @@ class Program
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"⚠️  AI extraction failed for page {pageNumber}: {ex.Message}");
+			Console.Error.WriteLine($"⚠️  AI extraction failed for page {pageNumber}: {ex.Message}");
 			return $"Page {pageNumber} Content (AI extraction failed)";
 		}
 	}
