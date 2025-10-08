@@ -6,7 +6,39 @@
 
 I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
 
-## Quick Start
+## What can it do?
+
+Scanotron 2000 transforms your PDF documents into actionable insights through AI-powered analysis:
+
+### Document Splitting & Analysis
+- **Page Breaking**: Use the `pagebreaker` prompt to intelligently identify logical document boundaries in merged PDFs
+- **Document Classification**: Automatically detect document types and categorize content
+
+### Data Extraction
+- **Structured Data**: Extract phone numbers, email addresses, dates, and other specific information
+- **Entity Recognition**: Identify people, organizations, locations, and key entities
+
+### Content Summarization
+- **Executive Summaries**: Generate concise overviews of lengthy documents
+- **Key Points**: Extract main ideas and important information from each page
+- **Headline Generation**: Create descriptive titles for document sections
+
+### Automation-Ready Processing
+- **Clean Output**: Use `--no-intro` for script-friendly, parseable results
+- **Custom Formatting**: Template-based output for integration with other tools
+
+```bash
+# Generate document summaries
+./scanotron report.pdf --prompt "Summarize this text in to sentences"
+
+# Split merged documents intelligently
+./scanotron merged-docs.pdf --prompt pagebreaker --no-intro
+
+# Extract contact information
+./scanotron business-cards.pdf --prompt "Extract phone numbers and emails" --no-intro
+```
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
