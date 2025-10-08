@@ -11,7 +11,7 @@ I built this to unmerge large PDFs back into multiple logical documents with the
 ### Prerequisites
 
 Precompiled executable
-- [.NET 9.0 runtime](hhttps://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- [.NET 9.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - An AI model server (LM Studio, Ollama, etc.) or OpenAI compatible API access
 
 Self compiled
