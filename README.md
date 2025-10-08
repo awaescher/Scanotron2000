@@ -23,13 +23,13 @@ Self compiled
 
 ```bash
 # extract headlines from each page
-scanotron document.pdf --prompt headliner
+./scanotron document.pdf --prompt headliner
 
 # find logical document breaks to split up merged documents
-scanotron large-document.pdf --prompt pagebreaker
+./scanotron large-document.pdf --prompt pagebreaker
 
 # Generate JSON metadata for each page
-scanotron report.pdf --prompt json-derulo
+./scanotron report.pdf --prompt json-derulo
 ```
 
 Running a self compiled version from source code requires `dotnet run --` instead of `scanotron`.
@@ -49,22 +49,22 @@ dotnet run -- document.pdf --prompt headliner
 ```bash
 # Start LM Studio and load a model
 # Default endpoint: http://localhost:1234
-scanotron document.pdf --prompt headliner
+./scanotron document.pdf --prompt headliner
 ```
 
 #### Ollama
 ```bash
-scanotron document.pdf --prompt headliner --endpoint http://localhost:11434
+./scanotron document.pdf --prompt headliner --endpoint http://localhost:11434
 ```
 
 #### OpenAI
 ```bash
-scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-api-key
+./scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-api-key
 ```
 
 #### Custom OpenAI-Compatible API
 ```bash
-scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model
+./scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model
 ```
 
 ### Command Line Options

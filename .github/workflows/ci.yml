@@ -35,7 +35,7 @@ jobs:
           9.0.x
 
     - name: Restore dependencies
-      run: dotnet restore Scanotron.sln
+      run: dotnet restore scanotron.sln
       
     - name: Build
       run: dotnet build --no-restore --configuration=Release /p:Version=${{steps.gitversion.outputs.semVer}}
@@ -44,35 +44,35 @@ jobs:
       run: dotnet test --no-build --configuration=Release --verbosity normal
 
     - name: Publish for Windows x64 (Self-contained)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Linux x64 (Self-contained)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS Intel x64 (Self-contained)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=true --output=./publish/osx-intel-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=true --output=./publish/osx-intel-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS ARM64 (Self-contained)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Windows x64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Linux x64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS Intel x64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-intel-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-intel-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS ARM64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Create ZIP archives

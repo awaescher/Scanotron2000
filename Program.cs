@@ -50,7 +50,7 @@ class Program
         if (string.IsNullOrEmpty(promptName))
         {
             Console.WriteLine("❌ Error: The --prompt parameter is required.");
-            Console.WriteLine("💡 Example: Scanotron document.pdf --prompt headliner");
+            Console.WriteLine("💡 Example: scanotron document.pdf --prompt headliner");
             return 1;
         }
 
@@ -94,7 +94,7 @@ class Program
             
             Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
             Console.WriteLine();
-            Console.WriteLine("Usage: Scanotron <pdf-file> --prompt <prompt-name> [options]");
+            Console.WriteLine("Usage: scanotron <pdf-file> --prompt <prompt-name> [options]");
             Console.WriteLine();
             Console.WriteLine("Arguments:");
             Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
@@ -109,26 +109,26 @@ class Program
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine("  # LM Studio (default)");
-            Console.WriteLine("  Scanotron document.pdf --prompt headliner");
-            Console.WriteLine("  Scanotron document.pdf --prompt headliner --model \"llama-3.2-3b-instruct\"");
+            Console.WriteLine("  scanotron document.pdf --prompt headliner");
+            Console.WriteLine("  scanotron document.pdf --prompt headliner --model \"llama-3.2-3b-instruct\"");
             Console.WriteLine();
             Console.WriteLine("  # Ollama");
-            Console.WriteLine("  Scanotron document.pdf --prompt headliner --endpoint http://localhost:11434");
+            Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint http://localhost:11434");
             Console.WriteLine();
             Console.WriteLine("  # OpenAI");
-            Console.WriteLine("  Scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
+            Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
             Console.WriteLine();
             Console.WriteLine("  # Any OpenAI-compatible API");
-            Console.WriteLine("  Scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
+            Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
             Console.WriteLine();
             Console.WriteLine("Note: When no model is specified, the first available model will be used automatically.");
         }
         catch
         {
             // Fallback if kernel creation fails
-            Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
+            Console.WriteLine("scanotron 2000 - AI-powered PDF headline extractor");
             Console.WriteLine();
-            Console.WriteLine("Usage: Scanotron <pdf-file> --prompt <prompt-name> [options]");
+            Console.WriteLine("Usage: scanotron <pdf-file> --prompt <prompt-name> [options]");
             Console.WriteLine();
             Console.WriteLine("Arguments:");
             Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
