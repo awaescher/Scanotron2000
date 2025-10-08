@@ -83,7 +83,7 @@ jobs:
         
         # Copy binaries
         cp ./publish/osx-arm64/scanotron ./publish/scanotron.app/Contents/MacOS/scanotron
-        cp ./publish/osx-x64/scanotron ./publish/scanotron-intel.app/Contents/MacOS/scanotron
+        cp ./publish/osx-intel-x64/scanotron ./publish/scanotron-intel.app/Contents/MacOS/scanotron
         
         # Make binaries executable
         chmod +x ./publish/scanotron.app/Contents/MacOS/scanotron
