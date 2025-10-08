@@ -43,9 +43,79 @@ jobs:
     - name: Test
       run: dotnet test --no-build --configuration=Release --verbosity normal
 
+    - name: Publish for Windows x64
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for Linux x64
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for macOS x64
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=true --output=./publish/osx-x64 /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for macOS ARM64
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for Windows x64 (Framework-dependent)
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-fd /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for Linux x64 (Framework-dependent)
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-fd /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for macOS x64 (Framework-dependent)
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-x64-fd /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Publish for macOS ARM64 (Framework-dependent)
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-fd /p:Version=${{steps.gitversion.outputs.semVer}}
+      if: github.event_name != 'pull_request'
+
+    - name: Create ZIP archives
+      run: |
+        cd publish
+        zip -r ../scanotron-win-x64-${{steps.gitversion.outputs.semVer}}.zip win-x64/
+        tar -czf ../scanotron-linux-x64-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64 .
+        tar -czf ../scanotron-osx-x64-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-x64 .
+        tar -czf ../scanotron-osx-arm64-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64 .
+        zip -r ../scanotron-win-x64-fd-${{steps.gitversion.outputs.semVer}}.zip win-x64-fd/
+        tar -czf ../scanotron-linux-x64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64-fd .
+        tar -czf ../scanotron-osx-x64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-x64-fd .
+        tar -czf ../scanotron-osx-arm64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64-fd .
+      if: github.event_name != 'pull_request'
+
     - name: Create a GitHub release
       uses: ncipollo/release-action@v1
       with:
         tag: ${{steps.gitversion.outputs.semVer}}
         name: Release ${{steps.gitversion.outputs.semVer}}
+        artifacts: |
+          scanotron-win-x64-${{steps.gitversion.outputs.semVer}}.zip
+          scanotron-linux-x64-${{steps.gitversion.outputs.semVer}}.tar.gz
+          scanotron-osx-x64-${{steps.gitversion.outputs.semVer}}.tar.gz
+          scanotron-osx-arm64-${{steps.gitversion.outputs.semVer}}.tar.gz
+          scanotron-win-x64-fd-${{steps.gitversion.outputs.semVer}}.zip
+          scanotron-linux-x64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz
+          scanotron-osx-x64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz
+          scanotron-osx-arm64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz
+        body: |
+          ## Release ${{steps.gitversion.outputs.semVer}}
+          
+          ### Self-Contained Downloads (No .NET required)
+          - **Windows x64**: `scanotron-win-x64-${{steps.gitversion.outputs.semVer}}.zip`
+          - **Linux x64**: `scanotron-linux-x64-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS x64**: `scanotron-osx-x64-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS ARM64**: `scanotron-osx-arm64-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          
+          ### Framework-Dependent Downloads (.NET 9.0 required)
+          - **Windows x64**: `scanotron-win-x64-fd-${{steps.gitversion.outputs.semVer}}.zip`
+          - **Linux x64**: `scanotron-linux-x64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS x64**: `scanotron-osx-x64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS ARM64**: `scanotron-osx-arm64-fd-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          
+          **Note**: Self-contained binaries are larger but work without .NET installation. Framework-dependent binaries are smaller but require .NET 9.0 to be installed.
       if: github.event_name != 'pull_request'
