@@ -1,4 +1,4 @@
-# Scanotron 2000 🚀
+# 🤖 Scanotron 2000
 
 **Scanotron 2000** is an AI-powered pagewise PDF processing tool that extracts, analyzes, and transforms PDF content using customizable AI prompts. Built with .NET 9 and Microsoft Semantic Kernel, it supports multiple AI providers and offers specialized processing modes for different document analysis needs.
 
@@ -6,7 +6,7 @@
 
 I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -48,7 +48,7 @@ Running a self compiled version from source code requires `dotnet run --` instea
 dotnet run -- document.pdf --prompt headliner
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### AI Provider Setup
 
@@ -130,7 +130,7 @@ dotnet run -- document.pdf --prompt headliner
 
 The format template supports standard .NET string formatting for all variables.
 
-## � Advanced Features
+## Advanced Features
 
 ### Direct Prompt Mode
 Instead of using predefined prompt templates, you can provide direct prompt text:
@@ -177,7 +177,7 @@ Use `--no-intro` for clean output suitable for automation and piping:
 HEADLINES=$(./scanotron document.pdf --prompt headliner --format "{answer} " --no-intro)
 ```
 
-## �🛠️ Custom Prompts
+## Custom Prompts
 
 Create custom prompts by adding YAML files to the `Prompts/` directory:
 
@@ -200,7 +200,7 @@ template: |
   Use {{ $pageText }} to access the page content.
 ```
 
-## 🔍 How It Works
+## How It Works
 
 1. **PDF Text Extraction**: Uses iText7 to extract text content from PDF pages
 2. **AI Processing**: Sends extracted text to AI models via OpenAI-compatible APIs
