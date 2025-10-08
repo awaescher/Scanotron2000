@@ -7,7 +7,8 @@
 I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
 
 ```
-> dotnet run -- '/pdfs/4 documents merged.pdf' --model qwen/qwen3-4b-2507 --prompt pagebreaker --format "{answer}\nPage {pageNumber}\n"
+> ./scanotron '/pdfs/4 documents merged.pdf' --model qwen/qwen3-4b-2507 --prompt pagebreaker --format "{answer}\nPage {pageNumber}\n"
+
 🔍 Processing PDF: 4 documents merged.pdf
 🤖 Using model: qwen/qwen3-4b-2507 from http://localhost:1234
 📝 Using prompt template: pagebreaker
@@ -30,7 +31,7 @@ Page 6
 
 ## What can it do?
 
-Scanotron 2000 transforms your PDF documents into actionable insights through AI-powered analysis:
+Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use cases might be ...
 
 ### Document Splitting & Analysis
 - **Page Breaking**: Use the `pagebreaker` prompt to intelligently identify logical document boundaries in merged PDFs
