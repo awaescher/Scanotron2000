@@ -5,6 +5,7 @@
 ## 🤔 Why?
 
 I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
+And yes, this thing is vibe coded, you might notice.
 
 ## What can it do?
 
