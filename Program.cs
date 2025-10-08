@@ -113,8 +113,10 @@ class Program
 			Console.WriteLine($"  --prompt, -p      Prompt name or direct prompt text - available: {promptsList}");
 			Console.WriteLine("                    Can be a prompt name (e.g., 'headliner') or direct text (e.g., 'summarize this')");
 			Console.WriteLine("  --format, -f      Output format template [default: 'Page {pageNumber}:\\n{answer}\\n']");
-			Console.WriteLine("                    Variables: {pageNumber}, {pageCount}, {pageText}, {previousPageText}, {answer}, {date}, {time}, {totalDuration}, {pageDuration}");
-			Console.WriteLine("                    Supports .NET format strings: {pageNumber:D3}, {date:yyyy-MM-dd}, {totalDuration:mm\\:ss}, etc.");
+			Console.WriteLine("                    Variables: {pageNumber}, {pageCount}, {pageText}, {previousPageText}, {answer}");
+			Console.WriteLine("                    Date/Time: {now}, {utcNow}");
+			Console.WriteLine("                    Duration: {totalDuration}, {pageDuration}");
+			Console.WriteLine("                    Supports .NET format strings: {pageNumber:D3}, {now:yyyy-MM-dd HH:mm}, {totalDuration:mm\\:ss}, etc.");
 			Console.WriteLine("  --no-intro        Suppress all informational output, only show results");
 			Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
 			Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
@@ -125,15 +127,15 @@ class Program
 			Console.WriteLine("Examples:");
 			Console.WriteLine("  # Basic usage");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner");
-			Console.WriteLine("  scanotron document.pdf --prompt \"fasse zusammen\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Seite {pageNumber}: {answer}\"");
+			Console.WriteLine("  scanotron document.pdf --prompt \"summarize this\"");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber}: {answer}\"");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --no-intro");
 			Console.WriteLine();
 			Console.WriteLine("  # Advanced formatting with .NET format strings");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber:D3}/{pageCount:D3}: {answer}\"");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"{pageNumber:D2}. {answer}\\n\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Seite {pageNumber:00}/{pageCount:00}: {answer}\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"[{date:yyyy-MM-dd} {time:HH:mm}] Page {pageNumber}: {answer}\"");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber:00}/{pageCount:00}: {answer}\"");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"[{now:yyyy-MM-dd HH:mm}] Page {pageNumber}: {answer}\"");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber} ({pageDuration:ss\\.fff}s, total: {totalDuration:mm\\:ss}): {answer}\"");
 			Console.WriteLine();
 			Console.WriteLine("  # Ollama");
@@ -150,7 +152,7 @@ class Program
 		catch
 		{
 			// Fallback if kernel creation fails
-			Console.WriteLine("scanotron 2000 - AI-powered PDF headline extractor");
+			Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
 			Console.WriteLine();
 			Console.WriteLine("Usage: scanotron <pdf-file> --prompt <prompt-name> [options]");
 			Console.WriteLine();
@@ -195,31 +197,30 @@ class Program
 							 .Replace("\\t", "\t")
 							 .Replace("\\r", "\r");
 
-			// Get current date/time for formatting
-			var now = DateTime.Now;
+		// Get current date/time for formatting
+		var now = DateTime.Now;
+		var utcNow = DateTime.UtcNow;
 
-			// Use regex to replace variable names with indexed placeholders while preserving format specifiers
-			// This allows formats like {pageNumber:D3}, {pageCount:N0}, {date:yyyy-MM-dd}, {totalDuration:mm\\:ss}, etc.
-			var formatTemplate = System.Text.RegularExpressions.Regex.Replace(template, @"\{pageNumber(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{0:{match.Groups[1].Value}}}" : "{0}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageCount(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{1:{match.Groups[1].Value}}}" : "{1}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageText(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{2:{match.Groups[1].Value}}}" : "{2}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{previousPageText(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{3:{match.Groups[1].Value}}}" : "{3}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{answer(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{4:{match.Groups[1].Value}}}" : "{4}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{date(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{5:{match.Groups[1].Value}}}" : "{5}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{time(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{6:{match.Groups[1].Value}}}" : "{6}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{totalDuration(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{7:{match.Groups[1].Value}}}" : "{7}");
-			formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageDuration(?::([^}]*))?\}", match =>
-				match.Groups[1].Success ? $"{{8:{match.Groups[1].Value}}}" : "{8}");
-
-			var formattedString = string.Format(formatTemplate, pageNumber, pageCount, pageText, previousPageText, answer, now, now, totalDuration, pageDuration);
+		// Use regex to replace variable names with indexed placeholders while preserving format specifiers
+		// This allows formats like {pageNumber:D3}, {pageCount:N0}, {now:yyyy-MM-dd}, {totalDuration:mm\\:ss}, etc.
+		var formatTemplate = System.Text.RegularExpressions.Regex.Replace(template, @"\{pageNumber(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{0:{match.Groups[1].Value}}}" : "{0}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageCount(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{1:{match.Groups[1].Value}}}" : "{1}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageText(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{2:{match.Groups[1].Value}}}" : "{2}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{previousPageText(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{3:{match.Groups[1].Value}}}" : "{3}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{answer(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{4:{match.Groups[1].Value}}}" : "{4}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{now(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{5:{match.Groups[1].Value}}}" : "{5}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{utcNow(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{6:{match.Groups[1].Value}}}" : "{6}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{totalDuration(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{7:{match.Groups[1].Value}}}" : "{7}");
+		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageDuration(?::([^}]*))?\}", match =>
+			match.Groups[1].Success ? $"{{8:{match.Groups[1].Value}}}" : "{8}");			var formattedString = string.Format(formatTemplate, pageNumber, pageCount, pageText, previousPageText, answer, now, utcNow, totalDuration, pageDuration);
 
 			return formattedString;
 		}
@@ -227,14 +228,15 @@ class Program
 		{
 			// Fallback to simple replacement if format string is invalid
 			var now = DateTime.Now;
+			var utcNow = DateTime.UtcNow;
 			return template
 				.Replace("{pageNumber}", pageNumber.ToString())
 				.Replace("{pageCount}", pageCount.ToString())
 				.Replace("{pageText}", pageText)
 				.Replace("{previousPageText}", previousPageText)
 				.Replace("{answer}", answer)
-				.Replace("{date}", now.ToString("yyyy-MM-dd"))
-				.Replace("{time}", now.ToString("HH:mm:ss"))
+				.Replace("{now}", now.ToString("yyyy-MM-dd HH:mm:ss"))
+				.Replace("{utcNow}", utcNow.ToString("yyyy-MM-dd HH:mm:ss"))
 				.Replace("{totalDuration}", totalDuration.ToString(@"mm\:ss"))
 				.Replace("{pageDuration}", pageDuration.ToString(@"ss\.fff"))
 				.Replace("\\n", "\n")
@@ -375,7 +377,7 @@ class Program
 			// Set default output format if none provided
 			if (string.IsNullOrEmpty(outputFormat))
 			{
-				outputFormat = "Page {pageNumber}:\n{answer}\n";
+				outputFormat = "Page {pageNumber}:\n{answer}\n\n";
 			}
 
 			if (!noIntro)

@@ -96,8 +96,39 @@ dotnet run -- document.pdf --prompt headliner
 | `{pageText}` | Raw text content of the page | Full page text |
 | `{previousPageText}` | Text content of the previous page | Previous page text |
 | `{answer}` | AI-generated response | AI output |
+| `{pageDuration}` | Time to process this page | `1.245` |
+| `{totalDuration}` | Total processing time | `02:35` |
+| `{now}` | Current local date and time | `2025-10-08 14:30:45` |
+| `{utcNow}` | Current UTC date and time | `2025-10-08 12:30:45` |
 
-The format template supports standard .NET string formatting for numeric values.
+#### Format String Examples
+
+```bash
+# Basic formatting
+--format "Page {pageNumber}: {answer}\n"
+
+# With zero-padded page numbers
+--format "Page {pageNumber:D3}/{pageCount:D3}: {answer}\n"
+
+# With timestamps
+--format "[{now:yyyy-MM-dd HH:mm:ss}] Page {pageNumber}: {answer}\n"
+--format "[{utcNow:yyyy-MM-dd HH:mm:ss} UTC] {answer}\n"
+
+# Date/time only formats
+--format "[{now:yyyy-MM-dd}] {answer}\n"
+--format "[{now:HH:mm:ss}] {answer}\n"
+--format "[{utcNow:yyyy-MM-dd}] {answer}\n"
+--format "[{utcNow:HH:mm:ss}] {answer}\n"
+
+# With duration tracking
+--format "Page {pageNumber} ({pageDuration:ss\\.fff}s): {answer}\n"
+--format "{pageNumber:D2}. {answer} [Total: {totalDuration:mm\\:ss}]\n"
+
+# CSV format
+--format "{pageNumber},{now:yyyy-MM-dd},{answer}\n"
+```
+
+The format template supports standard .NET string formatting for all variables.
 
 ## � Advanced Features
 
@@ -105,8 +136,8 @@ The format template supports standard .NET string formatting for numeric values.
 Instead of using predefined prompt templates, you can provide direct prompt text:
 
 ```bash
-# Direct German prompt
-./scanotron document.pdf --prompt "Fasse den Inhalt dieser Seite in einem Satz zusammen"
+# Direct summarization prompt
+./scanotron document.pdf --prompt "Summarize the content of this page in one sentence"
 
 # Direct analysis prompt  
 ./scanotron document.pdf --prompt "Extract all phone numbers and email addresses from this page"
@@ -122,11 +153,17 @@ Customize the output format using template variables and .NET formatting:
 # Professional report format
 ./scanotron document.pdf --prompt headliner --format "Page {pageNumber} of {pageCount}: {answer}\n\n"
 
+# With timestamps
+./scanotron document.pdf --prompt headliner --format "[{now:yyyy-MM-dd HH:mm}] {answer}\n"
+
+# With UTC timestamps and duration
+./scanotron document.pdf --prompt headliner --format "{pageNumber:D3} | {utcNow:HH:mm:ss} UTC | {pageDuration:ss\\.fff}s | {answer}\n"
+
 # Minimal clean output
 ./scanotron document.pdf --prompt headliner --format "{answer}\n" --no-intro
 
 # CSV-like format (escape commas in content)
-./scanotron document.pdf --prompt headliner --format "{pageNumber},{answer}\n" --no-intro
+./scanotron document.pdf --prompt headliner --format "{pageNumber},{now:yyyy-MM-dd},{answer}\n" --no-intro
 ```
 
 ### Silent Processing
