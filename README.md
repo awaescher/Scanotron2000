@@ -1,28 +1,44 @@
 # Scanotron 2000 🚀
 
-[![.NET 9.0](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/9.0)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**Scanotron 2000** is an AI-powered pagewise PDF processing tool that extracts, analyzes, and transforms PDF content using customizable AI prompts. Built with .NET 9 and Microsoft Semantic Kernel, it supports multiple AI providers and offers specialized processing modes for different document analysis needs.
 
-**Scanotron 2000** is a AI-powered pagewise PDF processing tool that extracts, analyzes, and transforms PDF content using customizable AI prompts. Built with .NET 9 and Microsoft Semantic Kernel, it supports multiple AI providers and offers specialized processing modes for different document analysis needs.
+## 🤔 Why?
+
+I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
+Precompiled executable
+- [.NET 9.0 runtime](hhttps://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- An AI model server (LM Studio, Ollama, etc.) or OpenAI compatible API access
+
+Self compiled
+- [git](https://git-scm.com/)
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- An AI model server (LM Studio, Ollama, etc.) or OpenAI API access
+- An AI model server (LM Studio, Ollama, etc.) or OpenAI compatible API access
 
 ### Basic Usage
 
 ```bash
 # extract headlines from each page
-dotnet run -- document.pdf --prompt headliner
+scanotron document.pdf --prompt headliner
 
 # find logical document breaks to split up merged documents
-dotnet run -- large-document.pdf --prompt pagebreaker
+scanotron large-document.pdf --prompt pagebreaker
 
 # Generate JSON metadata for each page
-dotnet run -- report.pdf --prompt json-derulo
+scanotron report.pdf --prompt json-derulo
+```
+
+Running a self compiled version from source code requires `dotnet run --` instead of `scanotron`.
+
+```bash
+# dotnet run is compiling an running scanotron on your machine
+# the -- afterwards tells the command line that dotnet run doesnt get any command line agruments
+# the command line arguments after -- are meant for the scanotron executable
+dotnet run -- document.pdf --prompt headliner
 ```
 
 ## 🔧 Configuration
@@ -33,22 +49,22 @@ dotnet run -- report.pdf --prompt json-derulo
 ```bash
 # Start LM Studio and load a model
 # Default endpoint: http://localhost:1234
-dotnet run -- document.pdf --prompt headliner
+scanotron document.pdf --prompt headliner
 ```
 
 #### Ollama
 ```bash
-dotnet run -- document.pdf --prompt headliner --endpoint http://localhost:11434
+scanotron document.pdf --prompt headliner --endpoint http://localhost:11434
 ```
 
 #### OpenAI
 ```bash
-dotnet run -- document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-api-key
+scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-api-key
 ```
 
 #### Custom OpenAI-Compatible API
 ```bash
-dotnet run -- document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model
+scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model
 ```
 
 ### Command Line Options

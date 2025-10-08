@@ -117,7 +117,6 @@ class Program
             Console.WriteLine();
             Console.WriteLine("  # OpenAI");
             Console.WriteLine("  Scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
-            Console.WriteLine("  Scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
             Console.WriteLine();
             Console.WriteLine("  # Any OpenAI-compatible API");
             Console.WriteLine("  Scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
