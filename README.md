@@ -53,10 +53,7 @@ Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use c
 
 ```bash
 # Generate document summaries
-./scanotron report.pdf --prompt "Summarize this text in to sentences"
-
-# Split merged documents intelligently
-./scanotron merged-docs.pdf --prompt pagebreaker
+./scanotron report.pdf --prompt "Summarize this text in to sentences" -format "Page {pageNumber}: {answer}\n"
 
 # Extract contact information
 ./scanotron business-cards.pdf --prompt "Extract phone numbers and emails" --verbose
@@ -72,6 +69,8 @@ Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use c
 If you prefer to run the app from code, you'll need [git](https://git-scm.com/) and the [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) instead of the runtime.
 
 ### Basic Usage
+
+> Scanotron prefers machine readability and does not print any meta info by default, just the AI response. You might want to add `--verbose` or a format that prints the page number like `--format "Page {pageNumber}: {answer}\n"` to your command.
 
 ```bash
 # Extract headlines from each page

@@ -62,9 +62,7 @@ class Program
 		if (string.IsNullOrEmpty(specifiedModel))
 		{
 			if (verbose)
-			{
 				Console.WriteLine($"🔍 Discovering available models from {endpoint}...");
-			}
 			var availableModels = await GetAvailableModelsAsync(endpoint, apiKey);
 
 			if (availableModels.Count == 0)
@@ -80,9 +78,7 @@ class Program
 				Console.WriteLine($"🤖 Using first available model: {model}");
 
 				if (availableModels.Count > 1)
-				{
 					Console.WriteLine($"💡 Other available models: {string.Join(", ", availableModels.Skip(1))}");
-				}
 			}
 		}
 		else
@@ -176,9 +172,7 @@ class Program
 		for (int i = 0; i < args.Length - 1; i++)
 		{
 			if (argNames.Contains(args[i]))
-			{
 				return args[i + 1];
-			}
 		}
 		return null;
 	}
@@ -313,9 +307,7 @@ class Program
 
 			// Add authentication header if API key is provided
 			if (!string.IsNullOrEmpty(apiKey))
-			{
 				httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-			}
 
 			var response = await httpClient.GetStringAsync(modelsUrl);
 
@@ -376,14 +368,10 @@ class Program
 
 			// Set default output format if none provided
 			if (string.IsNullOrEmpty(outputFormat))
-			{
 				outputFormat = "{answer}\n";
-			}
 
 			if (verbose)
-			{
 				Console.WriteLine();
-			}
 
 			// Extract text from each page
 			using var pdfReader = new PdfReader(pdfFile.FullName);
@@ -413,9 +401,7 @@ class Program
 					if (string.IsNullOrWhiteSpace(pageText))
 					{
 						if (verbose)
-						{
 							Console.Error.WriteLine($"[⚠️ No extractable text found on page {pageNumber}]");
-						}
 						previousPageText = pageText; // Update for next iteration
 						continue;
 					}
@@ -426,10 +412,7 @@ class Program
 					pageStopwatch.Stop();
 
 					if (verbose)
-					{
-						var charCount = pageText?.Length ?? 0;
-						Console.WriteLine($"[Page: {pageNumber:D2}/{pageCount:D2}, Characters: {charCount}, Duration: {pageStopwatch.Elapsed.TotalSeconds:F2}s]");
-					}
+						Console.WriteLine($"[Page: {pageNumber:D2}/{pageCount:D2}, Characters: {pageText?.Length ?? 0}, Duration: {pageStopwatch.Elapsed.TotalSeconds:F2}s]");
 
 					// Format output using the specified template with .NET string formatting support
 					var formattedOutput = FormatOutputString(outputFormat, pageNumber, pageCount, pageText ?? string.Empty, previousPageText ?? string.Empty, result, totalStopwatch.Elapsed, pageStopwatch.Elapsed);
@@ -455,9 +438,7 @@ class Program
 			totalStopwatch.Stop();
 			
 			if (verbose)
-			{
 				Console.WriteLine($"[Total duration: {totalStopwatch.Elapsed.TotalSeconds:F2}s]");
-			}
 		}
 	}
 
