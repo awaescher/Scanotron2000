@@ -47,7 +47,8 @@ Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use c
 - **Headline Generation**: Create descriptive titles for document sections
 
 ### Automation-Ready Processing
-- **Clean Output**: Use `--no-intro` for script-friendly, parseable results
+- **Clean Output**: Default output is script-friendly and parseable
+- **Verbose Mode**: Use `--verbose` for detailed processing information
 - **Custom Formatting**: Template-based output for integration with other tools
 
 ```bash
@@ -55,10 +56,10 @@ Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use c
 ./scanotron report.pdf --prompt "Summarize this text in to sentences"
 
 # Split merged documents intelligently
-./scanotron merged-docs.pdf --prompt pagebreaker --no-intro
+./scanotron merged-docs.pdf --prompt pagebreaker
 
 # Extract contact information
-./scanotron business-cards.pdf --prompt "Extract phone numbers and emails" --no-intro
+./scanotron business-cards.pdf --prompt "Extract phone numbers and emails" --verbose
 ```
 
 ## Quick Start
@@ -83,10 +84,10 @@ If you prefer to run the app from code, you'll need [git](https://git-scm.com/) 
 ./scanotron large-document.pdf --prompt pagebreaker
 
 # Generate JSON metadata for each page
-./scanotron report.pdf --prompt json-derulo
+./scanotron report.pdf --prompt json-derulo --verbose
 
-# Clean output without informational messages
-./scanotron document.pdf --prompt headliner --no-intro
+# Show detailed processing information
+./scanotron document.pdf --prompt headliner --verbose
 
 ```
 
@@ -131,7 +132,7 @@ dotnet run -- document.pdf --prompt headliner
 |--------|-------|-------------|---------|
 | `--prompt` | `-p` | Prompt name or direct prompt text (required) | - |
 | `--format` | `-f` | Output format template with .NET formatting | `Page {pageNumber}:\n{answer}\n` |
-| `--no-intro` | - | Suppress all informational output | - |
+| `--verbose` | `-v` | Show detailed processing information | - |
 | `--model` | `-m` | Model name | Auto-detected |
 | `--endpoint` | `-e` | API endpoint URL | `http://localhost:1234` |
 | `--apikey` | `-k` | API key | `API_KEY` env var |
@@ -210,22 +211,22 @@ Customize the output format using template variables and .NET formatting:
 # With UTC timestamps and duration
 ./scanotron document.pdf --prompt headliner --format "{pageNumber:D3} | {utcNow:HH:mm:ss} UTC | {pageDuration:ss\\.fff}s | {answer}\n"
 
-# Minimal clean output
-./scanotron document.pdf --prompt headliner --format "{answer}\n" --no-intro
+# Minimal clean output (default behavior)
+./scanotron document.pdf --prompt headliner --format "{answer}\n"
 
 # CSV-like format (escape commas in content)
-./scanotron document.pdf --prompt headliner --format "{pageNumber},{now:yyyy-MM-dd},{answer}\n" --no-intro
+./scanotron document.pdf --prompt headliner --format "{pageNumber},{now:yyyy-MM-dd},{answer}\n"
 ```
 
-### Silent Processing
-Use `--no-intro` for clean output suitable for automation and piping:
+### Clean Processing
+By default, output is clean and suitable for automation and piping:
 
 ```bash
 # Pipe to file
-./scanotron document.pdf --prompt headliner --no-intro > results.txt
+./scanotron document.pdf --prompt headliner > results.txt
 
 # Use in scripts
-HEADLINES=$(./scanotron document.pdf --prompt headliner --format "{answer} " --no-intro)
+HEADLINES=$(./scanotron document.pdf --prompt headliner --format "{answer} ")
 ```
 
 ## Custom Prompts

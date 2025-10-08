@@ -40,7 +40,7 @@ class Program
 		string? specifiedModel = GetArgValue(args, "--model", "-m");
 		string? promptName = GetArgValue(args, "--prompt", "-p");
 		string? outputFormat = GetArgValue(args, "--format", "-f");
-		bool noIntro = HasFlag(args, "--no-intro");
+		bool verbose = HasFlag(args, "--verbose") || HasFlag(args, "-v");
 		string endpoint = GetArgValue(args, "--endpoint", "-e") ?? "http://localhost:1234";
 		string? apiKey = GetArgValue(args, "--apikey", "-k") ?? Environment.GetEnvironmentVariable("API_KEY");
 
@@ -61,7 +61,7 @@ class Program
 		string model;
 		if (string.IsNullOrEmpty(specifiedModel))
 		{
-			if (!noIntro)
+			if (verbose)
 			{
 				Console.WriteLine($"🔍 Discovering available models from {endpoint}...");
 			}
@@ -75,7 +75,7 @@ class Program
 
 			model = availableModels[0];
 
-			if (!noIntro)
+			if (verbose)
 			{
 				Console.WriteLine($"🤖 Using first available model: {model}");
 
@@ -90,7 +90,7 @@ class Program
 			model = specifiedModel;
 		}
 
-		await ProcessPdfAsync(new FileInfo(pdfPath), promptName, outputFormat, noIntro, model, endpoint, apiKey);
+		await ProcessPdfAsync(new FileInfo(pdfPath), promptName, outputFormat, verbose, model, endpoint, apiKey);
 		return 0;
 	}
 
@@ -117,7 +117,7 @@ class Program
 			Console.WriteLine("                    Date/Time: {now}, {utcNow}");
 			Console.WriteLine("                    Duration: {totalDuration}, {pageDuration}");
 			Console.WriteLine("                    Supports .NET format strings: {pageNumber:D3}, {now:yyyy-MM-dd HH:mm}, {totalDuration:mm\\:ss}, etc.");
-			Console.WriteLine("  --no-intro        Suppress all informational output, only show results");
+			Console.WriteLine("  --verbose, -v     Show detailed processing information");
 			Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
 			Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
 			Console.WriteLine("  --apikey, -k      API key (optional, can also use API_KEY env var)");
@@ -129,7 +129,7 @@ class Program
 			Console.WriteLine("  scanotron document.pdf --prompt headliner");
 			Console.WriteLine("  scanotron document.pdf --prompt \"summarize this\"");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber}: {answer}\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --no-intro");
+			Console.WriteLine("  scanotron document.pdf --prompt headliner --verbose");
 			Console.WriteLine();
 			Console.WriteLine("  # Advanced formatting with .NET format strings");
 			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber:D3}/{pageCount:D3}: {answer}\"");
@@ -162,7 +162,7 @@ class Program
 			Console.WriteLine("Options:");
 			Console.WriteLine("  --prompt, -p      Prompt name (required)");
 			Console.WriteLine("  --format, -f      Output format template [default: 'Page {pageNumber}:\\n{answer}\\n']");
-			Console.WriteLine("  --no-intro        Suppress all informational output, only show results");
+			Console.WriteLine("  --verbose, -v     Show detailed processing information");
 			Console.WriteLine("  --model, -m       Model name (auto-detected if not specified)");
 			Console.WriteLine("  --endpoint, -e    API endpoint URL [default: http://localhost:1234]");
 			Console.WriteLine("  --apikey, -k      API key (optional, can also use API_KEY env var)");
@@ -334,13 +334,13 @@ class Program
 		}
 	}
 
-	static async Task ProcessPdfAsync(FileInfo pdfFile, string promptName, string? outputFormat, bool noIntro, string model, string endpoint, string? apiKey)
+	static async Task ProcessPdfAsync(FileInfo pdfFile, string promptName, string? outputFormat, bool verbose, string model, string endpoint, string? apiKey)
 	{
 		var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
 		
 		try
 		{
-			if (!noIntro)
+			if (verbose)
 			{
 				Console.WriteLine($"🔍 Processing PDF: {pdfFile.Name}");
 				Console.WriteLine($"🤖 Using model: {model} from {endpoint}");
@@ -362,7 +362,7 @@ class Program
 				isPromptName = false;
 			}
 
-			if (!noIntro)
+			if (verbose)
 			{
 				if (isPromptName)
 				{
@@ -377,10 +377,10 @@ class Program
 			// Set default output format if none provided
 			if (string.IsNullOrEmpty(outputFormat))
 			{
-				outputFormat = "Page {pageNumber}:\n{answer}\n\n";
+				outputFormat = "{answer}\n";
 			}
 
-			if (!noIntro)
+			if (verbose)
 			{
 				Console.WriteLine();
 			}
@@ -391,7 +391,7 @@ class Program
 
 			int pageCount = pdfDocument.GetNumberOfPages();
 
-			if (!noIntro)
+			if (verbose)
 			{
 				Console.WriteLine($"📄 Total pages: {pageCount}");
 				Console.WriteLine();
@@ -412,21 +412,27 @@ class Program
 
 					if (string.IsNullOrWhiteSpace(pageText))
 					{
-						if (!noIntro)
+						if (verbose)
 						{
-							Console.Error.WriteLine($"⚠️  Page {pageNumber}: [No extractable text found]");
+							Console.Error.WriteLine($"[⚠️ No extractable text found on page {pageNumber}]");
 						}
 						previousPageText = pageText; // Update for next iteration
 						continue;
 					}
 
 					// Use AI to extract headline
-					var result = await ProcessPage(kernel, promptName, isPromptName, pageText, pageNumber, pageCount, previousPageText);
+					var result = await ProcessPage(kernel, promptName, isPromptName, pageText, pageNumber, pageCount, previousPageText ?? string.Empty);
 
 					pageStopwatch.Stop();
 
+					if (verbose)
+					{
+						var charCount = pageText?.Length ?? 0;
+						Console.WriteLine($"[Page: {pageNumber:D2}/{pageCount:D2}, Characters: {charCount}, Duration: {pageStopwatch.Elapsed.TotalSeconds:F2}s]");
+					}
+
 					// Format output using the specified template with .NET string formatting support
-					var formattedOutput = FormatOutputString(outputFormat, pageNumber, pageCount, pageText, previousPageText, result, totalStopwatch.Elapsed, pageStopwatch.Elapsed);
+					var formattedOutput = FormatOutputString(outputFormat, pageNumber, pageCount, pageText ?? string.Empty, previousPageText ?? string.Empty, result, totalStopwatch.Elapsed, pageStopwatch.Elapsed);
 
 					Console.Write(formattedOutput);
 
@@ -447,6 +453,11 @@ class Program
 		finally
 		{
 			totalStopwatch.Stop();
+			
+			if (verbose)
+			{
+				Console.WriteLine($"[Total duration: {totalStopwatch.Elapsed.TotalSeconds:F2}s]");
+			}
 		}
 	}
 
