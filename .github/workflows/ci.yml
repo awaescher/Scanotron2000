@@ -43,48 +43,36 @@ jobs:
     - name: Test
       run: dotnet test --no-build --configuration=Release --verbosity normal
 
-    - name: Publish for Windows x64
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 /p:Version=${{steps.gitversion.outputs.semVer}}
-      if: github.event_name != 'pull_request'
-
-    - name: Publish for Linux x64
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 /p:Version=${{steps.gitversion.outputs.semVer}}
-      if: github.event_name != 'pull_request'
-
-    - name: Publish for Windows x64
+    - name: Publish for Windows x64 (Self-contained)
       run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
-    - name: Publish for Linux x64
+    - name: Publish for Linux x64 (Self-contained)
       run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
-    - name: Publish for macOS Intel x64
+    - name: Publish for macOS Intel x64 (Self-contained)
       run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=true --output=./publish/osx-intel-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
-    - name: Publish for macOS ARM64
+    - name: Publish for macOS ARM64 (Self-contained)
       run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
-    - name: Publish for macOS ARM64
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 /p:Version=${{steps.gitversion.outputs.semVer}}
-      if: github.event_name != 'pull_request'
-
     - name: Publish for Windows x64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-framework-dependent /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Linux x64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-framework-dependent /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS Intel x64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-intel-x64-framework-dependent /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-intel-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS ARM64 (Framework-dependent)
-      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish Scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Create ZIP archives
@@ -117,15 +105,15 @@ jobs:
         body: |
           ## Release ${{steps.gitversion.outputs.semVer}}
           
-          ### 🚀 Self-Contained Downloads (Recommended for most users)
+          ### Self-Contained Downloads (Recommended for most users)
           **Single executable file - No .NET installation required - Ready to run immediately**
           - **Windows x64**: `scanotron-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip`
           - **Linux x64**: `scanotron-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
           - **macOS Intel (x64)**: `scanotron-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
           - **macOS Apple Silicon (ARM64)**: `scanotron-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
           
-          ### ⚡ Framework-Dependent Downloads (Smaller size)
-          **Requires .NET 9.0 Runtime to be installed**
+          ### Framework-Dependent Downloads (Smaller size)
+          **Single executable file - Requires .NET 9.0 Runtime to be installed**
           - **Windows x64**: `scanotron-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip`
           - **Linux x64**: `scanotron-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
           - **macOS Intel (x64)**: `scanotron-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
@@ -134,6 +122,6 @@ jobs:
           ---
           
           **Which version should I choose?**
-          - 🚀 **Self-contained**: Choose this if you want the easiest setup. Single executable file (~50-100MB) that works immediately.
-          - ⚡ **Framework-dependent**: Choose this if you have .NET 9.0 installed. Smaller download (~5-20MB) but requires [.NET 9.0 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0).
+          - **Self-contained**: Choose this if you want the easiest setup. Single executable file (~50-100MB) that works immediately.
+          - **Framework-dependent**: Choose this if you have .NET 9.0 installed. Smaller download (~5-20MB) but requires [.NET 9.0 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0).
       if: github.event_name != 'pull_request'
