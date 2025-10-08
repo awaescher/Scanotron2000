@@ -5,7 +5,28 @@
 ## 🤔 Why?
 
 I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
-And yes, this thing is vibe coded, you might notice.
+
+```
+> dotnet run -- '/pdfs/4 documents merged.pdf' --model qwen/qwen3-4b-2507 --prompt pagebreaker --format "{answer}\nPage {pageNumber}\n"
+🔍 Processing PDF: 4 documents merged.pdf
+🤖 Using model: qwen/qwen3-4b-2507 from http://localhost:1234
+📝 Using prompt template: pagebreaker
+
+📄 Total pages: 6
+
+
+Page 1
+---BREAK-NEW-DOCUMENT---
+Page 2
+
+Page 3
+
+Page 4
+---BREAK-NEW-DOCUMENT---
+Page 5
+---BREAK-NEW-DOCUMENT---
+Page 6
+```
 
 ## What can it do?
 
