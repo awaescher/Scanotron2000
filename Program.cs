@@ -21,7 +21,7 @@ public class ModelsResponse
 
 class Program
 {
-	private const string SCANOTRON_FORMAT_PREFIX = "#scanotron_format:";
+	private const string SCANOTRON_OUTPUT_FORMAT_PREFIX = "# scanotron_output_format:";
 	private const string DEFAULT_OUTPUT_FORMAT = "{answer}\n";
 	private const string PROMPTS_DIRECTORY = "Prompts";
 	private const string PROMPT_FILE_EXTENSION = ".yml";
@@ -383,7 +383,7 @@ class Program
 						if (string.IsNullOrEmpty(outputFormat))
 							Console.WriteLine($"📄 No custom format found in prompt {promptName}");
 						else
-							Console.WriteLine($"📄 Using format from prompt metadata: \"{outputFormat.Replace("\n", "\\n")}\"");
+							Console.WriteLine($"📄 Using output format from prompt metadata: \"{outputFormat.Replace("\n", "\\n")}\"");
 					}
 				}
 				
@@ -392,12 +392,12 @@ class Program
 				{
 					outputFormat = DEFAULT_OUTPUT_FORMAT;
 					if (verbose)
-						Console.WriteLine($"📄 Using default format: \"{outputFormat.Replace("\n", "\\n")}\"");
+						Console.WriteLine($"📄 Using default output format: \"{outputFormat.Replace("\n", "\\n")}\"");
 				}
 			}
 			else if (verbose)
 			{
-				Console.WriteLine($"📄 Using specified format: \"{outputFormat.Replace("\n", "\\n")}\"");
+				Console.WriteLine($"📄 Using specified output format: \"{outputFormat.Replace("\n", "\\n")}\"");
 			}
 
 			if (verbose)
@@ -507,9 +507,9 @@ class Program
 			{
 				string trimmedLine = line.Trim();
 				
-				if (trimmedLine.StartsWith(SCANOTRON_FORMAT_PREFIX))
+				if (trimmedLine.StartsWith(SCANOTRON_OUTPUT_FORMAT_PREFIX))
 				{
-					string formatValue = trimmedLine.Substring(SCANOTRON_FORMAT_PREFIX.Length).Trim();
+					string formatValue = trimmedLine.Substring(SCANOTRON_OUTPUT_FORMAT_PREFIX.Length).Trim();
 					
 					// Replace escaped newlines
 					formatValue = formatValue.Replace("\\n", "\n");

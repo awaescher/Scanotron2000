@@ -1,7 +1,11 @@
 name: pagebreaker
 
 template_format: semantic-kernel
-#scanotron_format: {answer}\nPage {pageNumber}\n
+
+# custom parameters for scanotron
+# these have to be behind comments because Semantic Kernel
+# seems to be very strict about the YAML schema
+# scanotron_output_format: {answer}\nPageu {pageNumber}\n
 
 description: Detects when a PDF page represents a new document section that should be split from the previous content.
 

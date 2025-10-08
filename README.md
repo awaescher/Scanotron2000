@@ -189,7 +189,7 @@ To define a custom default format for a prompt, add a comment line in the YAML f
 
 ```yaml
 name: my-prompt
-#scanotron_format: {answer}\nPage {pageNumber}\n
+# scanotron_output_format: {answer}\nPage {pageNumber}\n
 
 template_format: semantic-kernel
 description: My custom prompt
