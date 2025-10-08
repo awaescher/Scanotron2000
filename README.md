@@ -65,14 +65,10 @@ Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use c
 
 ### Prerequisites
 
-Precompiled executable
-- [.NET 9.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-- An AI model server (LM Studio, Ollama, etc.) or OpenAI compatible API access
+- An OpenAI compatible endpoint, which includes proprietary servies like ChatGPT as well as local servers server as LM Studio, Ollama, etc.
+- [.NET 9.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for the framework-dependent executable (not required for the self-contained one)
 
-Self compiled
-- [git](https://git-scm.com/)
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- An AI model server (LM Studio, Ollama, etc.) or OpenAI compatible API access
+If you prefer to run the app from code, you'll need [git](https://git-scm.com/) and the [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) instead of the runtime.
 
 ### Basic Usage
 
