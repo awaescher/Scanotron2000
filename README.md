@@ -38,7 +38,7 @@ Scanotron 2000 transforms your PDF documents into actionable insights through AI
 ./scanotron business-cards.pdf --prompt "Extract phone numbers and emails" --no-intro
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
