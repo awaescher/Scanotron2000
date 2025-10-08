@@ -181,6 +181,23 @@ dotnet run -- document.pdf --prompt headliner
 
 The format template supports standard .NET string formatting for all variables.
 
+#### Prompt-Specific Default Formats
+
+Individual prompts can define their own default output format. If no `--format` parameter is specified, Scanotron will use the prompt's default format if available, or fall back to the general default `{answer}\n`.
+
+To define a custom default format for a prompt, add a comment line in the YAML file:
+
+```yaml
+name: my-prompt
+#scanotron_format: {answer}\nPage {pageNumber}\n
+
+template_format: semantic-kernel
+description: My custom prompt
+...
+```
+
+This has to be commented out because Semantic Kernel is very strict about the allowed properties in the schema.
+
 ## Advanced Features
 
 ### Direct Prompt Mode

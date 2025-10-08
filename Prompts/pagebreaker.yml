@@ -1,6 +1,7 @@
 name: pagebreaker
 
 template_format: semantic-kernel
+#scanotron_format: {answer}\nPage {pageNumber}\n
 
 description: Detects when a PDF page represents a new document section that should be split from the previous content.
 

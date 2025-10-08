@@ -21,6 +21,11 @@ public class ModelsResponse
 
 class Program
 {
+	private const string SCANOTRON_FORMAT_PREFIX = "#scanotron_format:";
+	private const string DEFAULT_OUTPUT_FORMAT = "{answer}\n";
+	private const string PROMPTS_DIRECTORY = "Prompts";
+	private const string PROMPT_FILE_EXTENSION = ".yml";
+	
 	static async Task<int> Main(string[] args)
 	{
 		// Simple argument parsing
@@ -368,7 +373,32 @@ class Program
 
 			// Set default output format if none provided
 			if (string.IsNullOrEmpty(outputFormat))
-				outputFormat = "{answer}\n";
+			{
+				// Try to get default format from prompt metadata
+				if (isPromptName)
+				{
+					outputFormat = GetDefaultFormatFromPrompt(promptName);
+					if (verbose)
+					{
+						if (string.IsNullOrEmpty(outputFormat))
+							Console.WriteLine($"📄 No custom format found in prompt {promptName}");
+						else
+							Console.WriteLine($"📄 Using format from prompt metadata: \"{outputFormat.Replace("\n", "\\n")}\"");
+					}
+				}
+				
+				// Fallback to general default if still empty
+				if (string.IsNullOrEmpty(outputFormat))
+				{
+					outputFormat = DEFAULT_OUTPUT_FORMAT;
+					if (verbose)
+						Console.WriteLine($"📄 Using default format: \"{outputFormat.Replace("\n", "\\n")}\"");
+				}
+			}
+			else if (verbose)
+			{
+				Console.WriteLine($"📄 Using specified format: \"{outputFormat.Replace("\n", "\\n")}\"");
+			}
 
 			if (verbose)
 				Console.WriteLine();
@@ -460,6 +490,40 @@ class Program
 		builder.Plugins.AddFromPromptDirectoryYaml("Prompts");
 
 		return builder.Build();
+	}
+
+	static string? GetDefaultFormatFromPrompt(string promptName)
+	{
+		try
+		{
+			string promptFilePath = Path.Combine(PROMPTS_DIRECTORY, $"{promptName}{PROMPT_FILE_EXTENSION}");
+			if (!File.Exists(promptFilePath))
+				return null;
+
+			string yamlContent = File.ReadAllText(promptFilePath);
+			
+			// Look for scanotron format comment
+			foreach (string line in yamlContent.Split('\n'))
+			{
+				string trimmedLine = line.Trim();
+				
+				if (trimmedLine.StartsWith(SCANOTRON_FORMAT_PREFIX))
+				{
+					string formatValue = trimmedLine.Substring(SCANOTRON_FORMAT_PREFIX.Length).Trim();
+					
+					// Replace escaped newlines
+					formatValue = formatValue.Replace("\\n", "\n");
+					
+					return formatValue;
+				}
+			}
+		}
+		catch
+		{
+			// Silently fail - no warnings needed if format is not specified
+		}
+		
+		return null;
 	}
 
 	static async Task<string> ProcessPage(Kernel kernel, string promptName, bool isPromptName, string pageText, int pageNumber, int pageCount, string previousPageText)
