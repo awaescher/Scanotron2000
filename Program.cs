@@ -4,6 +4,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Scanotron;
 
@@ -99,8 +100,7 @@ class Program
 	{
 		try
 		{
-			var kernel = CreateKernel("dummy-model", "http://localhost:1234", null);
-			var availablePrompts = GetAvailablePromptsFromKernel(kernel);
+			var availablePrompts = GetAvailablePrompts();
 			var promptsList = availablePrompts.Count > 0 ? string.Join(", ", availablePrompts) : "No prompts found";
 
 			Console.WriteLine("Scanotron 2000 - Throw local or hosted LLMs against pdf pages.");
@@ -187,6 +187,21 @@ class Program
 		return args.Any(arg => flagNames.Contains(arg));
 	}
 
+	private static readonly Dictionary<string, int> _variableMapping = new()
+	{
+		{ "pageNumber", 0 },
+		{ "pageCount", 1 },
+		{ "pageText", 2 },
+		{ "previousPageText", 3 },
+		{ "answer", 4 },
+		{ "now", 5 },
+		{ "utcNow", 6 },
+		{ "totalDuration", 7 },
+		{ "pageDuration", 8 }
+	};
+
+	private static readonly Regex _variablePattern = new(@"\{(\w+)(?::([^}]*))?\}", RegexOptions.Compiled);
+
 	static string FormatOutputString(string template, int pageNumber, int pageCount, string pageText, string previousPageText, string answer, TimeSpan totalDuration, TimeSpan pageDuration)
 	{
 		try
@@ -196,32 +211,31 @@ class Program
 							 .Replace("\\t", "\t")
 							 .Replace("\\r", "\r");
 
-		// Get current date/time for formatting
-		var now = DateTime.Now;
-		var utcNow = DateTime.UtcNow;
+			// Get current date/time for formatting
+			var now = DateTime.Now;
+			var utcNow = DateTime.UtcNow;
 
-		// Use regex to replace variable names with indexed placeholders while preserving format specifiers
-		// This allows formats like {pageNumber:D3}, {pageCount:N0}, {now:yyyy-MM-dd}, {totalDuration:mm\\:ss}, etc.
-		var formatTemplate = System.Text.RegularExpressions.Regex.Replace(template, @"\{pageNumber(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{0:{match.Groups[1].Value}}}" : "{0}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageCount(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{1:{match.Groups[1].Value}}}" : "{1}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageText(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{2:{match.Groups[1].Value}}}" : "{2}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{previousPageText(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{3:{match.Groups[1].Value}}}" : "{3}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{answer(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{4:{match.Groups[1].Value}}}" : "{4}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{now(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{5:{match.Groups[1].Value}}}" : "{5}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{utcNow(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{6:{match.Groups[1].Value}}}" : "{6}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{totalDuration(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{7:{match.Groups[1].Value}}}" : "{7}");
-		formatTemplate = System.Text.RegularExpressions.Regex.Replace(formatTemplate, @"\{pageDuration(?::([^}]*))?\}", match =>
-			match.Groups[1].Success ? $"{{8:{match.Groups[1].Value}}}" : "{8}");			var formattedString = string.Format(formatTemplate, pageNumber, pageCount, pageText, previousPageText, answer, now, utcNow, totalDuration, pageDuration);
+			// Create array of values in the same order as the mapping
+			var values = new object[] { pageNumber, pageCount, pageText, previousPageText, answer, now, utcNow, totalDuration, pageDuration };
 
-			return formattedString;
+			// Use a single regex to replace all variables with indexed placeholders
+			var formatTemplate = _variablePattern.Replace(template, match =>
+			{
+				var variableName = match.Groups[1].Value;
+				var formatSpecifier = match.Groups[2].Success ? match.Groups[2].Value : null;
+
+				if (_variableMapping.TryGetValue(variableName, out var index))
+				{
+					return formatSpecifier != null 
+						? $"{{{index}:{formatSpecifier}}}" 
+						: $"{{{index}}}";
+				}
+
+				// Return original match if variable not found
+				return match.Value;
+			});
+
+			return string.Format(formatTemplate, values);
 		}
 		catch (FormatException)
 		{
@@ -249,18 +263,6 @@ class Program
 		try
 		{
 			var kernel = CreateKernel("dummy-model", "http://localhost:1234", null);
-			return GetAvailablePromptsFromKernel(kernel);
-		}
-		catch
-		{
-			return new List<string>();
-		}
-	}
-
-	static List<string> GetAvailablePromptsFromKernel(Kernel kernel)
-	{
-		try
-		{
 			var promptsPlugin = kernel.Plugins["Prompts"];
 			return promptsPlugin.Select(f => f.Name).ToList();
 		}
@@ -331,6 +333,20 @@ class Program
 		}
 	}
 
+	static bool IsKnownPrompt(Kernel kernel, string promptName)
+	{
+		try
+		{
+			var promptsPlugin = kernel.Plugins["Prompts"];
+			return promptsPlugin.Any(f => f.Name == promptName);
+		}
+		catch
+		{
+			// If we can't load prompts, assume it's direct text
+			return false;
+		}
+	}
+
 	static async Task ProcessPdfAsync(FileInfo pdfFile, string promptName, string? outputFormat, bool verbose, string model, string endpoint, string? apiKey)
 	{
 		var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -347,17 +363,7 @@ class Program
 			var kernel = CreateKernel(model, endpoint, apiKey);
 
 			// Check if promptName is a known prompt or direct text
-			bool isPromptName = false;
-			try
-			{
-				var promptsPlugin = kernel.Plugins["Prompts"];
-				isPromptName = promptsPlugin.Any(f => f.Name == promptName);
-			}
-			catch
-			{
-				// If we can't load prompts, assume it's direct text
-				isPromptName = false;
-			}
+			bool isPromptName = IsKnownPrompt(kernel, promptName);
 
 			if (verbose)
 			{
