@@ -1,4 +1,9 @@
-name: pagebreaker-slicable
+# This is a prompt to split pdf documents into separate files based on their content.
+# The output of a pdf document is a pattern that is pipe-separated and can be
+# piped into https://github.com/awaescher/split-happens to effectively split the PDF into
+# multiple files.
+
+name: split-happens
 
 template_format: semantic-kernel
 
