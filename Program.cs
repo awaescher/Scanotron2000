@@ -6,7 +6,7 @@ using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Scanotron;
+namespace pdfbrrr;
 
 public class ModelInfo
 {
@@ -22,7 +22,7 @@ public class ModelsResponse
 
 class Program
 {
-	private const string SCANOTRON_OUTPUT_FORMAT_PREFIX = "# scanotron_output_format:";
+	private const string PDFBRRR_OUTPUT_FORMAT_PREFIX = "# pdfbrrr_output_format:";
 	private const string DEFAULT_OUTPUT_FORMAT = "{answer}\n";
 	private const string PROMPTS_DIRECTORY = "Prompts";
 	private const string PROMPT_FILE_EXTENSION = ".yml";
@@ -59,7 +59,7 @@ class Program
 		if (string.IsNullOrEmpty(promptName))
 		{
 			Console.Error.WriteLine("❌ Error: The --prompt parameter is required.");
-			Console.Error.WriteLine("💡 Example: scanotron document.pdf --prompt headliner");
+			Console.Error.WriteLine("💡 Example: pdfbrrr document.pdf --prompt headliner");
 			return 1;
 		}
 
@@ -103,9 +103,9 @@ class Program
 			var availablePrompts = GetAvailablePrompts();
 			var promptsList = availablePrompts.Count > 0 ? string.Join(", ", availablePrompts) : "No prompts found";
 
-			Console.WriteLine("Scanotron 2000 - Throw local or hosted LLMs against pdf pages.");
+			Console.WriteLine("pdfbrrr - pdfs go brrr.");
 			Console.WriteLine();
-			Console.WriteLine("Usage: scanotron <pdf-file> --prompt <prompt-name> [options]");
+			Console.WriteLine("Usage: pdfbrrr <pdf-file> --prompt <prompt-name> [options]");
 			Console.WriteLine();
 			Console.WriteLine("Arguments:");
 			Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
@@ -127,35 +127,35 @@ class Program
 			Console.WriteLine();
 			Console.WriteLine("Examples:");
 			Console.WriteLine("  # Basic usage");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner");
-			Console.WriteLine("  scanotron document.pdf --prompt \"summarize this\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber}: {answer}\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --verbose");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt \"summarize this\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --format \"Page {pageNumber}: {answer}\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --verbose");
 			Console.WriteLine();
 			Console.WriteLine("  # Advanced formatting with .NET format strings");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber:D3}/{pageCount:D3}: {answer}\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"{pageNumber:D2}. {answer}\\n\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber:00}/{pageCount:00}: {answer}\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"[{now:yyyy-MM-dd HH:mm}] Page {pageNumber}: {answer}\"");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --format \"Page {pageNumber} ({pageDuration:ss\\.fff}s, total: {totalDuration:mm\\:ss}): {answer}\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --format \"Page {pageNumber:D3}/{pageCount:D3}: {answer}\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --format \"{pageNumber:D2}. {answer}\\n\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --format \"Page {pageNumber:00}/{pageCount:00}: {answer}\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --format \"[{now:yyyy-MM-dd HH:mm}] Page {pageNumber}: {answer}\"");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --format \"Page {pageNumber} ({pageDuration:ss\\.fff}s, total: {totalDuration:mm\\:ss}): {answer}\"");
 			Console.WriteLine();
 			Console.WriteLine("  # Ollama");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint http://localhost:11434");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --endpoint http://localhost:11434");
 			Console.WriteLine();
 			Console.WriteLine("  # OpenAI");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-key");
 			Console.WriteLine();
 			Console.WriteLine("  # Any OpenAI-compatible API");
-			Console.WriteLine("  scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
+			Console.WriteLine("  pdfbrrr document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model");
 			Console.WriteLine();
 			Console.WriteLine("Note: When no model is specified, the first available model will be used automatically.");
 		}
 		catch
 		{
 			// Fallback if kernel creation fails
-			Console.WriteLine("Scanotron 2000 - AI-powered PDF headline extractor");
+			Console.WriteLine("pdfbrrr - AI-powered PDF headline extractor");
 			Console.WriteLine();
-			Console.WriteLine("Usage: scanotron <pdf-file> --prompt <prompt-name> [options]");
+			Console.WriteLine("Usage: pdfbrrr <pdf-file> --prompt <prompt-name> [options]");
 			Console.WriteLine();
 			Console.WriteLine("Arguments:");
 			Console.WriteLine("  <pdf-file>    Path to the PDF file to process");
@@ -508,14 +508,14 @@ class Program
 
 			string yamlContent = File.ReadAllText(promptFilePath);
 			
-			// Look for scanotron format comment
+			// Look for pdfbrrr format comment
 			foreach (string line in yamlContent.Split('\n'))
 			{
 				string trimmedLine = line.Trim();
 				
-				if (trimmedLine.StartsWith(SCANOTRON_OUTPUT_FORMAT_PREFIX))
+				if (trimmedLine.StartsWith(PDFBRRR_OUTPUT_FORMAT_PREFIX))
 				{
-					string formatValue = trimmedLine.Substring(SCANOTRON_OUTPUT_FORMAT_PREFIX.Length).Trim();
+					string formatValue = trimmedLine.Substring(PDFBRRR_OUTPUT_FORMAT_PREFIX.Length).Trim();
 					
 					// Replace escaped newlines
 					formatValue = formatValue.Replace("\\n", "\n");

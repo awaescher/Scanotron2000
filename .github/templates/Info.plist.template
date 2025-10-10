@@ -3,13 +3,13 @@
 <plist version="1.0">
   <dict>
     <key>CFBundleExecutable</key>
-    <string>scanotron</string>
+    <string>pdfbrrr</string>
     <key>CFBundleIdentifier</key>
-    <string>com.github.awaescher.scanotron</string>
+    <string>com.github.awaescher.pdfbrrr</string>
     <key>CFBundleName</key>
-    <string>scanotron</string>
+    <string>pdfbrrr</string>
     <key>CFBundleDisplayName</key>
-    <string>Scanotron 2000</string>
+    <string>pdfbrrr</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

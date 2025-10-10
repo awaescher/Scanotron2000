@@ -35,7 +35,7 @@ jobs:
           9.0.x
 
     - name: Restore dependencies
-      run: dotnet restore scanotron.sln
+      run: dotnet restore pdfbrrr.sln
       
     - name: Build
       run: dotnet build --no-restore --configuration=Release /p:Version=${{steps.gitversion.outputs.semVer}}
@@ -44,64 +44,64 @@ jobs:
       run: dotnet test --no-build --configuration=Release --verbosity normal
 
     - name: Publish for Windows x64 (Self-contained)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=win-x64 --self-contained=true --output=./publish/win-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Linux x64 (Self-contained)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=linux-x64 --self-contained=true --output=./publish/linux-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS Intel x64 (Self-contained)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=true --output=./publish/osx-intel-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=osx-x64 --self-contained=true --output=./publish/osx-intel-x64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS ARM64 (Self-contained)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=osx-arm64 --self-contained=true --output=./publish/osx-arm64 -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Windows x64 (Framework-dependent)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=win-x64 --self-contained=false --output=./publish/win-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for Linux x64 (Framework-dependent)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=linux-x64 --self-contained=false --output=./publish/linux-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS Intel x64 (Framework-dependent)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-intel-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=osx-x64 --self-contained=false --output=./publish/osx-intel-x64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Publish for macOS ARM64 (Framework-dependent)
-      run: dotnet publish scanotron.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
+      run: dotnet publish pdfbrrr.csproj --configuration=Release --runtime=osx-arm64 --self-contained=false --output=./publish/osx-arm64-framework-dependent -p:PublishSingleFile=true /p:Version=${{steps.gitversion.outputs.semVer}}
       if: github.event_name != 'pull_request'
 
     - name: Sign macOS binaries
       run: |
         # Ad-hoc code signing for macOS binaries (works without Developer ID)
-        codesign --force --sign - ./publish/osx-arm64/scanotron || echo "Code signing failed for ARM64, but continuing..."
-        codesign --force --sign - ./publish/osx-intel-x64/scanotron || echo "Code signing failed for Intel, but continuing..."
+        codesign --force --sign - ./publish/osx-arm64/pdfbrrr || echo "Code signing failed for ARM64, but continuing..."
+        codesign --force --sign - ./publish/osx-intel-x64/pdfbrrr || echo "Code signing failed for Intel, but continuing..."
         
         # Verify signing
-        codesign --verify --verbose ./publish/osx-arm64/scanotron || echo "Verification failed for ARM64"
-        codesign --verify --verbose ./publish/osx-intel-x64/scanotron || echo "Verification failed for Intel"
+        codesign --verify --verbose ./publish/osx-arm64/pdfbrrr || echo "Verification failed for ARM64"
+        codesign --verify --verbose ./publish/osx-intel-x64/pdfbrrr || echo "Verification failed for Intel"
         
         # Also sign framework-dependent versions
-        codesign --force --sign - ./publish/osx-arm64-framework-dependent/scanotron || echo "Code signing failed for ARM64 framework-dependent, but continuing..."
-        codesign --force --sign - ./publish/osx-intel-x64-framework-dependent/scanotron || echo "Code signing failed for Intel framework-dependent, but continuing..."
+        codesign --force --sign - ./publish/osx-arm64-framework-dependent/pdfbrrr || echo "Code signing failed for ARM64 framework-dependent, but continuing..."
+        codesign --force --sign - ./publish/osx-intel-x64-framework-dependent/pdfbrrr || echo "Code signing failed for Intel framework-dependent, but continuing..."
       if: github.event_name != 'pull_request'
 
     - name: Create ZIP archives
       run: |
         cd publish
         # Traditional binary archives
-        zip -r ../scanotron-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip win-x64/
-        tar -czf ../scanotron-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64 .
-        tar -czf ../scanotron-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-intel-x64 .
-        tar -czf ../scanotron-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64 .
-        zip -r ../scanotron-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip win-x64-framework-dependent/
-        tar -czf ../scanotron-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64-framework-dependent .
-        tar -czf ../scanotron-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-intel-x64-framework-dependent .
-        tar -czf ../scanotron-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64-framework-dependent .
+        zip -r ../pdfbrrr-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip win-x64/
+        tar -czf ../pdfbrrr-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64 .
+        tar -czf ../pdfbrrr-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-intel-x64 .
+        tar -czf ../pdfbrrr-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64 .
+        zip -r ../pdfbrrr-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip win-x64-framework-dependent/
+        tar -czf ../pdfbrrr-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C linux-x64-framework-dependent .
+        tar -czf ../pdfbrrr-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-intel-x64-framework-dependent .
+        tar -czf ../pdfbrrr-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz -C osx-arm64-framework-dependent .
       if: github.event_name != 'pull_request'
 
     - name: Create a GitHub release
@@ -110,30 +110,30 @@ jobs:
         tag: ${{steps.gitversion.outputs.semVer}}
         name: Release ${{steps.gitversion.outputs.semVer}}
         artifacts: |
-          scanotron-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip
-          scanotron-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz
-          scanotron-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz
-          scanotron-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz
-          scanotron-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip
-          scanotron-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
-          scanotron-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
-          scanotron-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
+          pdfbrrr-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip
+          pdfbrrr-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz
+          pdfbrrr-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz
+          pdfbrrr-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz
+          pdfbrrr-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip
+          pdfbrrr-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
+          pdfbrrr-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
+          pdfbrrr-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz
         body: |
           ## Release ${{steps.gitversion.outputs.semVer}}
           
           ### Self-Contained Downloads (Recommended for most users)
           **Single executable file - No .NET installation required - Ready to run immediately**
-          - **Windows x64**: `scanotron-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip`
-          - **Linux x64**: `scanotron-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
-          - **macOS Intel (x64)**: `scanotron-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
-          - **macOS Apple Silicon (ARM64)**: `scanotron-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **Windows x64**: `pdfbrrr-win-x64-self-contained-${{steps.gitversion.outputs.semVer}}.zip`
+          - **Linux x64**: `pdfbrrr-linux-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS Intel (x64)**: `pdfbrrr-osx-intel-x64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS Apple Silicon (ARM64)**: `pdfbrrr-osx-arm64-self-contained-${{steps.gitversion.outputs.semVer}}.tar.gz`
           
           ### Framework-Dependent Downloads (Smaller size)
           **Single executable file - Requires .NET 9.0 Runtime to be installed**
-          - **Windows x64**: `scanotron-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip`
-          - **Linux x64**: `scanotron-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
-          - **macOS Intel (x64)**: `scanotron-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
-          - **macOS Apple Silicon (ARM64)**: `scanotron-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **Windows x64**: `pdfbrrr-win-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.zip`
+          - **Linux x64**: `pdfbrrr-linux-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS Intel (x64)**: `pdfbrrr-osx-intel-x64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
+          - **macOS Apple Silicon (ARM64)**: `pdfbrrr-osx-arm64-framework-dependent-${{steps.gitversion.outputs.semVer}}.tar.gz`
           
           ---
           

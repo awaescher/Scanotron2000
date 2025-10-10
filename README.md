@@ -1,279 +1,272 @@
-# 🤖 Scanotron 2000
+# pdfbrrr
 
-**Scanotron 2000** is an AI-powered pagewise PDF processing tool that extracts, analyzes, and transforms PDF content using customizable AI prompts. Built with .NET 9 and Microsoft Semantic Kernel, it supports multiple AI providers and offers specialized processing modes for different document analysis needs.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 🤔 Why?
+Throw local or hosted LLMs against PDF pages. pdfbrrr is a command-line tool that processes PDF documents using AI prompts to extract information, generate summaries, analyze sentiment, and more - one page at a time.
 
-I built this to unmerge large PDFs back into multiple logical documents with the "pagebreaker" prompt.
+## Features
 
-```
-> ./scanotron '/pdfs/4 documents merged.pdf' --model qwen/qwen3-4b-2507 --prompt pagebreaker --format "{answer}\nPage {pageNumber}\n"
+- **Multi-Prompt Processing**: Apply different AI prompts to each page of a PDF document
+- **Flexible Output Formatting**: Customize output with .NET-style format strings
+- **Multiple AI Backends**: Works with local LLMs (Ollama, LM Studio) and cloud services (OpenAI, Azure OpenAI)
+- **Built-in Prompt Library**: Comes with 10+ pre-built prompts for common document analysis tasks
+- **CLI Focused**: Designed for automation and integration into workflows
+- **Cross-Platform**: Runs on Windows, macOS, and Linux
 
-🔍 Processing PDF: 4 documents merged.pdf
-🤖 Using model: qwen/qwen3-4b-2507 from http://localhost:1234
-📝 Using prompt template: pagebreaker
+## Built-in Prompts
 
-📄 Total pages: 6
+pdfbrrr includes several pre-built prompts for common document analysis tasks:
 
+| Prompt | Description |
+|--------|-------------|
+| `headliner` | Extracts the main headline or title from each page |
+| `sir-summarizer` | Summarizes content in the style of a snobbish aristocrat |
+| `entity-extractor` | Identifies and categorizes named entities (persons, organizations, locations, etc.) |
+| `sentiment-analyzer` | Analyzes emotional tone and sentiment of content |
+| `compliance-checker` | Checks content for regulatory compliance issues |
+| `document-type-detector` | Classifies the type of document based on content |
+| `json-derulo` | Converts structured data to JSON format |
+| `pagebreaker` | Identifies logical sections and breaks in content |
+| `privacy-scanner` | Detects potential privacy-related information |
+| `action-items` | Extracts actionable items and tasks from content |
 
-Page 1
----BREAK-NEW-DOCUMENT---
-Page 2
+## Installation
 
-Page 3
+### Prerequisites
 
-Page 4
----BREAK-NEW-DOCUMENT---
-Page 5
----BREAK-NEW-DOCUMENT---
-Page 6
-```
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- An AI model server (local or cloud)
 
-## What can it do?
-
-Scanotron 2000 lets you apply LLM prompts to each page of a PDF file. Some use cases might be ...
-
-### Document Splitting & Analysis
-- **Page Breaking**: Use the `pagebreaker` prompt to intelligently identify logical document boundaries in merged PDFs
-- **Document Classification**: Automatically detect document types and categorize content
-
-### Data Extraction
-- **Structured Data**: Extract phone numbers, email addresses, dates, and other specific information
-- **Entity Recognition**: Identify people, organizations, locations, and key entities
-
-### Content Summarization
-- **Executive Summaries**: Generate concise overviews of lengthy documents
-- **Key Points**: Extract main ideas and important information from each page
-- **Headline Generation**: Create descriptive titles for document sections
-
-### Automation-Ready Processing
-- **Clean Output**: Default output is script-friendly and parseable
-- **Verbose Mode**: Use `--verbose` for detailed processing information
-- **Custom Formatting**: Template-based output for integration with other tools
+### Building from Source
 
 ```bash
-# Generate document summaries
-./scanotron report.pdf --prompt "Summarize this text in to sentences" -format "Page {pageNumber}: {answer}\n"
+git clone https://github.com/your-username/pdfbrrr.git
+cd pdfbrrr
+dotnet build -c Release
+```
 
-# Extract contact information
-./scanotron business-cards.pdf --prompt "Extract phone numbers and emails" --verbose
+### Running
+
+```bash
+dotnet run -- [options] <pdf-file>
+```
+
+Or after building:
+
+```bash
+dotnet bin/Release/net8.0/pdfbrrr.dll [options] <pdf-file>
 ```
 
 ## Quick Start
 
-### Prerequisites
-
-- An OpenAI compatible endpoint, which includes proprietary servies like ChatGPT as well as local servers server as LM Studio, Ollama, etc.
-- [.NET 9.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) for the framework-dependent executable (not required for the self-contained one)
-
-If you prefer to run the app from code, you'll need [git](https://git-scm.com/) and the [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) instead of the runtime.
-
 ### Basic Usage
-
-> Scanotron prefers machine readability and does not print any meta info by default, just the AI response. You might want to add `--verbose` or a format that prints the page number like `--format "Page {pageNumber}: {answer}\n"` to your command.
 
 ```bash
 # Extract headlines from each page
-./scanotron document.pdf --prompt headliner
+pdfbrrr document.pdf --prompt headliner
 
-# Use custom direct prompts (no predefined template needed)
-./scanotron document.pdf --prompt "Summarize the main points in bullet format"
+# Summarize each page with a specific style
+pdfbrrr document.pdf --prompt sir-summarizer
 
-# Find logical document breaks to split up merged documents
-./scanotron large-document.pdf --prompt pagebreaker
-
-# Generate JSON metadata for each page
-./scanotron report.pdf --prompt json-derulo --verbose
-
-# Show detailed processing information
-./scanotron document.pdf --prompt headliner --verbose
-
+# Use a custom prompt
+pdfbrrr document.pdf --prompt "Summarize this content in one sentence"
 ```
 
-Running a self compiled version from source code requires `dotnet run --` instead of `scanotron`.
+### With Local LLM Server
 
 ```bash
-# dotnet run is compiling an running scanotron on your machine
-# the -- afterwards tells the command line that dotnet run doesnt get any command line agruments
-# the command line arguments after -- are meant for the scanotron executable
-dotnet run -- document.pdf --prompt headliner
+# With Ollama (default endpoint)
+pdfbrrr document.pdf --prompt headliner --endpoint http://localhost:11434
+
+# With LM Studio (default endpoint)
+pdfbrrr document.pdf --prompt headliner --endpoint http://localhost:1234
 ```
 
-## Configuration
-
-### AI Provider Setup
-
-#### LM Studio (Default)
-```bash
-# Start LM Studio and load a model
-# Default endpoint: http://localhost:1234
-./scanotron document.pdf --prompt headliner
-```
-
-#### Ollama
-```bash
-./scanotron document.pdf --prompt headliner --endpoint http://localhost:11434
-```
-
-#### OpenAI
-```bash
-./scanotron document.pdf --prompt headliner --endpoint https://api.openai.com --apikey your-api-key
-```
-
-#### Custom OpenAI-Compatible API
-```bash
-./scanotron document.pdf --prompt headliner --endpoint http://your-server:8080 --model your-model
-```
-
-### Command Line Options
-
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--prompt` | `-p` | Prompt name or direct prompt text (required) | - |
-| `--format` | `-f` | Output format template with .NET formatting | `Page {pageNumber}:\n{answer}\n` |
-| `--verbose` | `-v` | Show detailed processing information | - |
-| `--model` | `-m` | Model name | Auto-detected |
-| `--endpoint` | `-e` | API endpoint URL | `http://localhost:1234` |
-| `--apikey` | `-k` | API key | `API_KEY` env var |
-| `--list-prompts` | - | List available prompts | - |
-| `--help` | `-h` | Show help | - |
-
-#### Format Template Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `{pageNumber}` | Current page number | `1` |
-| `{pageCount}` | Total number of pages | `42` |
-| `{pageText}` | Raw text content of the page | Full page text |
-| `{previousPageText}` | Text content of the previous page | Previous page text |
-| `{answer}` | AI-generated response | AI output |
-| `{pageDuration}` | Time to process this page | `1.245` |
-| `{totalDuration}` | Total processing time | `02:35` |
-| `{now}` | Current local date and time | `2025-10-08 14:30:45` |
-| `{utcNow}` | Current UTC date and time | `2025-10-08 12:30:45` |
-
-#### Format String Examples
+### With Cloud Services
 
 ```bash
-# Basic formatting
---format "Page {pageNumber}: {answer}\n"
+# With OpenAI
+pdfbrrr document.pdf --prompt headliner --endpoint https://api.openai.com --apikey YOUR_API_KEY
 
-# With zero-padded page numbers
---format "Page {pageNumber:D3}/{pageCount:D3}: {answer}\n"
-
-# With timestamps
---format "[{now:yyyy-MM-dd HH:mm:ss}] Page {pageNumber}: {answer}\n"
---format "[{utcNow:yyyy-MM-dd HH:mm:ss} UTC] {answer}\n"
-
-# Date/time only formats
---format "[{now:yyyy-MM-dd}] {answer}\n"
---format "[{now:HH:mm:ss}] {answer}\n"
---format "[{utcNow:yyyy-MM-dd}] {answer}\n"
---format "[{utcNow:HH:mm:ss}] {answer}\n"
-
-# With duration tracking
---format "Page {pageNumber} ({pageDuration:ss\\.fff}s): {answer}\n"
---format "{pageNumber:D2}. {answer} [Total: {totalDuration:mm\\:ss}]\n"
-
-# CSV format
---format "{pageNumber},{now:yyyy-MM-dd},{answer}\n"
+# With Azure OpenAI
+pdfbrrr document.pdf --prompt headliner --endpoint https://YOUR_RESOURCE.openai.azure.com --apikey YOUR_API_KEY --model gpt-4
 ```
 
-The format template supports standard .NET string formatting for all variables.
+## Output Formatting
 
-#### Prompt-Specific Default Formats
+pdfbrrr supports powerful output formatting using .NET-style format strings with custom variables:
 
-Individual prompts can define their own default output format. If no `--format` parameter is specified, Scanotron will use the prompt's default format if available, or fall back to the general default `{answer}\n`.
+### Available Variables
 
-To define a custom default format for a prompt, add a comment line in the YAML file:
+| Variable | Description |
+|----------|-------------|
+| `{pageNumber}` | Current page number |
+| `{pageCount}` | Total number of pages |
+| `{pageText}` | Full text content of current page |
+| `{previousPageText}` | Text content of previous page |
+| `{answer}` | AI-generated response |
+| `{now}` | Current local date/time |
+| `{utcNow}` | Current UTC date/time |
+| `{totalDuration}` | Total processing time |
+| `{pageDuration}` | Time to process current page |
 
-```yaml
-name: my-prompt
-# CUSTOM PARAMETERS FOR SCANOTRON
-# these have to be defined in comments because Semantic Kernel
-# seems to be very strict about the YAML schema
-# scanotron_output_format: {answer}\nPage {pageNumber}\n
+### Format Specifiers
 
-template_format: semantic-kernel
-description: My custom prompt
-...
-```
-
-This has to be commented out because Semantic Kernel is very strict about the allowed properties in the schema.
-
-## Advanced Features
-
-### Direct Prompt Mode
-Instead of using predefined prompt templates, you can provide direct prompt text:
+All variables support .NET format specifiers:
 
 ```bash
-# Direct summarization prompt
-./scanotron document.pdf --prompt "Summarize the content of this page in one sentence"
+# Number formatting
+pdfbrrr document.pdf --prompt headliner --format "Page {pageNumber:D3}/{pageCount:D3}: {answer}"
 
-# Direct analysis prompt  
-./scanotron document.pdf --prompt "Extract all phone numbers and email addresses from this page"
+# Date/time formatting
+pdfbrrr document.pdf --prompt headliner --format "[{now:yyyy-MM-dd HH:mm}] Page {pageNumber}: {answer}"
 
-# Direct translation prompt
-./scanotron document.pdf --prompt "Translate this text to French"
+# Duration formatting
+pdfbrrr document.pdf --prompt headliner --format "Page {pageNumber} ({pageDuration:ss\\.fff}s): {answer}"
 ```
 
-### Output Formatting
-Customize the output format using template variables and .NET formatting:
+### Examples
 
 ```bash
-# Professional report format
-./scanotron document.pdf --prompt headliner --format "Page {pageNumber} of {pageCount}: {answer}\n\n"
+# Default format
+pdfbrrr document.pdf --prompt headliner
+# Output: Page 1:\nExtracted headline\nPage 2:\nAnother headline
 
-# With timestamps
-./scanotron document.pdf --prompt headliner --format "[{now:yyyy-MM-dd HH:mm}] {answer}\n"
+# Custom format with page numbers
+pdfbrrr document.pdf --prompt headliner --format "Page {pageNumber}: {answer}\n"
 
-# With UTC timestamps and duration
-./scanotron document.pdf --prompt headliner --format "{pageNumber:D3} | {utcNow:HH:mm:ss} UTC | {pageDuration:ss\\.fff}s | {answer}\n"
+# Advanced formatting with timestamps
+pdfbrrr document.pdf --prompt headliner --format "[{now:HH:mm:ss}] {pageNumber:D2}. {answer}\n"
 
-# Minimal clean output (default behavior)
-./scanotron document.pdf --prompt headliner --format "{answer}\n"
-
-# CSV-like format (escape commas in content)
-./scanotron document.pdf --prompt headliner --format "{pageNumber},{now:yyyy-MM-dd},{answer}\n"
+# JSON-like output
+pdfbrrr document.pdf --prompt headliner --format "{{\"page\": {pageNumber}, \"headline\": \"{answer}\"}}\n"
 ```
 
-### Clean Processing
-By default, output is clean and suitable for automation and piping:
+## API Compatibility
+
+pdfbrrr works with any OpenAI-compatible API:
+
+### Supported Platforms
+
+- **Ollama**: `--endpoint http://localhost:11434`
+- **LM Studio**: `--endpoint http://localhost:1234`
+- **OpenAI**: `--endpoint https://api.openai.com --apikey YOUR_KEY`
+- **Azure OpenAI**: `--endpoint https://RESOURCE.openai.azure.com --apikey YOUR_KEY`
+- **Any OpenAI-compatible server**: `--endpoint YOUR_ENDPOINT --apikey YOUR_KEY`
+
+### Model Selection
 
 ```bash
-# Pipe to file
-./scanotron document.pdf --prompt headliner > results.txt
+# Auto-detect first available model
+pdfbrrr document.pdf --prompt headliner
 
-# Use in scripts
-HEADLINES=$(./scanotron document.pdf --prompt headliner --format "{answer} ")
+# Specify a model
+pdfbrrr document.pdf --prompt headliner --model gpt-4
+
+# List available models
+pdfbrrr --list-models --endpoint http://localhost:1234
 ```
 
-## Custom Prompts
+## Command Line Options
 
-Create custom prompts by adding YAML files to the `Prompts/` directory:
+```bash
+Usage: pdfbrrr <pdf-file> --prompt <prompt-name> [options]
 
-```yaml
-name: your-custom-prompt
-template_format: semantic-kernel
-description: Your prompt description
+Arguments:
+  <pdf-file>    Path to the PDF file to process
 
-input_variables:
-  - name: pageText
-    description: The text content of the page
-    is_required: true
-
-execution_settings:
-  default:
-    temperature: 0.7
-
-template: |
-  Your custom prompt template here.
-  Use {{ $pageText }} to access the page content.
+Options:
+  --prompt, -p      Prompt name or direct prompt text
+  --format, -f      Output format template [default: 'Page {pageNumber}:\n{answer}\n']
+  --verbose, -v     Show detailed processing information
+  --model, -m       Model name (auto-detected if not specified)
+  --endpoint, -e    API endpoint URL [default: http://localhost:1234]
+  --apikey, -k      API key (optional, can also use API_KEY env var)
+  --list-prompts    List all available prompts and their descriptions
+  --help, -h        Show this help
 ```
 
-## How It Works
+## Environment Variables
 
-1. **PDF Text Extraction**: Uses iText7 to extract text content from PDF pages
-2. **AI Processing**: Sends extracted text to AI models via OpenAI-compatible APIs
-3. **Prompt Application**: Applies specialized prompts using Microsoft Semantic Kernel
-4. **Result Output**: Returns processed results based on the selected prompt
+- `API_KEY`: Default API key for authentication (alternative to `--apikey`)
+
+## Examples
+
+### Document Analysis
+
+```bash
+# Extract all headlines
+pdfbrrr report.pdf --prompt headliner --verbose
+
+# Generate summaries for each page
+pdfbrrr report.pdf --prompt sir-summarizer --format "Page {pageNumber}:\n{answer}\n\n"
+
+# Extract entities from each page
+pdfbrrr contract.pdf --prompt entity-extractor
+
+# Analyze sentiment of customer feedback
+pdfbrrr feedback.pdf --prompt sentiment-analyzer
+
+# Check for compliance issues
+pdfbrrr document.pdf --prompt compliance-checker
+```
+
+### Workflow Automation
+
+```bash
+# Process multiple documents
+for file in *.pdf; do
+  pdfbrrr "$file" --prompt headliner > "${file%.pdf}_headlines.txt"
+done
+
+# Generate JSON output for further processing
+pdfbrrr report.pdf --prompt entity-extractor --format "{{\"page\": {pageNumber}, \"entities\": \"{answer}\"}},\n" > entities.json
+
+# Create a summary report
+pdfbrrr report.pdf --prompt sir-summarizer --format "Page {pageNumber}: {answer}\n" > summary.txt
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"No models found" error**
+   - Ensure your LLM server is running
+   - Check the endpoint URL with `--endpoint`
+   - Specify a model explicitly with `--model`
+
+2. **Authentication errors**
+   - Set API key with `--apikey` or `API_KEY` environment variable
+   - Check that your API key has proper permissions
+
+3. **Slow processing**
+   - Use `--verbose` to see processing times per page
+   - Consider using a smaller model or shorter prompts
+   - Check your server's resource usage
+
+### Getting Help
+
+```bash
+# Show help
+pdfbrrr --help
+
+# List available prompts
+pdfbrrr --list-prompts
+
+# List available models
+pdfbrrr --list-models
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request

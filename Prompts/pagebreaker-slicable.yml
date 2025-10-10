@@ -1,11 +1,11 @@
-name: pagebreaker
+name: pagebreaker-slicable
 
 template_format: semantic-kernel
 
 # CUSTOM PARAMETERS FOR pdfbrrr
 # these have to be defined in comments because Semantic Kernel
 # seems to be very strict about the YAML schema
-# pdfbrrr_output_format: {answer}\nPage {pageNumber}\n
+# pdfbrrr_output_format: {answer}{pageNumber}
 
 description: Detects when a PDF page represents a new document section that should be split from the previous content.
 
@@ -18,7 +18,7 @@ input_variables:
     is_required: true
 
 output_variable:
-  description: Either "---BREAK-NEW-DOCUMENT---" if pages should be split or empty if they belong together
+  description: Either "|" if pages should be split or "+" if they belong together
 
 execution_settings:
   default:
@@ -30,29 +30,29 @@ template: |
   This is used to automatically break up large 200+ page PDFs into smaller, logical document chunks.
 
   IMPORTANT:
-  You should be VERY CONSERVATIVE and only output "---BREAK-NEW-DOCUMENT---" when you are absolutely certain that this is a completely different document type or source.
+  You should be VERY CONSERVATIVE and only output "|" when you are absolutely certain that this is a completely different document type or source.
 
   Analyze the previous page and current page content to detect document boundaries.
 
-  Output "---BREAK-NEW-DOCUMENT---" ONLY if you detect ALL of these conditions:
+  Output "|" ONLY if you detect ALL of these conditions:
   - Completely different document type (e.g. insurance document → tax return → bank statement)
   - Different organization/company as the document issuer
   - Different document purpose/function
   - Clear evidence this is NOT a continuation of the same document
 
-  Examples of when to output "---BREAK-NEW-DOCUMENT---":
+  Examples of when to output "|":
   - Previous page: Insurance policy → Current page: Tax office tax return
   - Previous page: Bank statement → Current page: Employment contract
   - Previous page: Medical report → Current page: Invoice from different company
 
-  DO NOT output "---BREAK-NEW-DOCUMENT---" for:
+  Do output "+" instead of "|" for:
   - Different pages of the same document (even if different sections)
   - Same document type from same organization
   - Continuation pages, appendices, or attachments of the same document
   - Different sections within the same document (e.g. different chapters)
   - Same company but different products (still same organization)
 
-  You can only return "---BREAK-NEW-DOCUMENT---" or an empty response. No other text.
+  You can only return "|" to split or "+" to indicate they belong together. No other text.
 
   Previous page text:
   ```
