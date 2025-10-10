@@ -1,7 +1,5 @@
 # pdfbrrr
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
 Throw local or hosted LLMs against PDF pages. pdfbrrr is a command-line tool that processes PDF documents using AI prompts to extract information, generate summaries, analyze sentiment, and more - one page at a time.
 
 ## Features
