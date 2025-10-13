@@ -1,0 +1,59 @@
+# .NET Core build output
+bin/
+obj/
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code files
+.vscode/
+
+# Rider files
+*.sln.iml
+*.csproj.iml
+
+# macOS files
+.DS_Store
+
+# ReSharper files
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet files
+packages/
+*.nuget.props
+*.nuget.targets
+
+# .NET Core publish output
+publish/
+
+# Rider HTTP Client history
+.http/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
+# Backup files
+*.bak
+*.backup
+
+# IDE files
+*.ide
+
+# User-specific files
+*.userprefs
+*.usertasks
+
+# Test results
+TestResults/
+
+# PDF output directory
+output/

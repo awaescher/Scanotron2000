@@ -1,0 +1,6 @@
+[submodule "split-happens"]
+	path = split-happens
+	url = https://github.com/awaescher/split-happens
+[submodule "pdfbrrr"]
+	path = pdfbrrr
+	url = https://github.com/awaescher/pdfbrrr
