@@ -11,6 +11,15 @@ Scanotron2000 is a PDF processing orchestrator that combines two powerful tools:
 3. It then runs `split-happens` with the original PDF and the pattern to split the document into logical parts
 4. The resulting split PDFs are saved to the specified output directory
 
+## Important
+
+Apple is very restrictive when it comes to opening apps from unverified developers. To be able to use this app, you need to manually allow the executable to be run.
+
+Not only once but three times: for scanotron, pdfbrrr and split-happens.
+
+More details here:
+https://support.apple.com/en-us/guide/mac-help/mh40616/mac
+
 ## Prerequisites
 
 - .NET 9.0 SDK
