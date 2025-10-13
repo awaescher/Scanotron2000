@@ -255,36 +255,82 @@ class Program
 		return new CommandLineArguments(pdfFile, outputDirectory, model, endpoint, apiKey, force);
 	}
 
+	/// <summary>
+	/// Locates the executable for a given project name.
+	/// First checks if the binary is next to the current executable (Release build scenario),
+	/// then falls back to the development build paths (../project/bin/Release or Debug).
+	/// </summary>
+	/// <param name="projectName">The name of the project (e.g., "pdfbrrr", "split-happens")</param>
+	/// <returns>The path to the executable, or null if not found</returns>
+	static string? FindExecutable(string projectName)
+	{
+		var isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+		var executableName = isWindows ? $"{projectName}.exe" : projectName;
+		
+		// Get the directory where the current executable is running from
+		var currentExecutableDir = AppContext.BaseDirectory;
+		
+		// Option 1: Check if the binary is next to the current executable (Release build scenario)
+		var localPath = Path.Combine(currentExecutableDir, executableName);
+		if (File.Exists(localPath))
+		{
+			return localPath;
+		}
+		
+		// Option 2: Check development build paths (relative to project root)
+		// Try Release build first
+		var releasePath = Path.Combine("..", projectName, "bin", "Release", "net9.0", executableName);
+		if (File.Exists(releasePath))
+		{
+			return releasePath;
+		}
+		
+		// Fall back to Debug build
+		var debugPath = Path.Combine("..", projectName, "bin", "Debug", "net9.0", executableName);
+		if (File.Exists(debugPath))
+		{
+			return debugPath;
+		}
+		
+		// Not found
+		return null;
+	}
+
 	static async Task<string?> RunPdfbrrrAsync(string pdfFile, string? model, string? endpoint, string? apiKey)
 	{
 		try
 		{
+			var executablePath = FindExecutable("pdfbrrr");
+			if (executablePath == null)
+			{
+				LogError("Could not locate pdfbrrr executable. Please ensure it is built.");
+				return null;
+			}
+			
+			// Determine working directory - use pdfbrrr project directory if in development mode
+			var workingDirectory = Path.GetDirectoryName(executablePath);
+			if (executablePath.Contains(Path.Combine("bin", "Release")) || executablePath.Contains(Path.Combine("bin", "Debug")))
+			{
+				// In development mode, set working directory to the project root (where Prompts folder is)
+				workingDirectory = Path.Combine(workingDirectory!, "..", "..", "..", "..");
+				workingDirectory = Path.GetFullPath(workingDirectory);
+			}
+			
 			var startInfo = new ProcessStartInfo
 			{
-				FileName = Path.Combine("..", "pdfbrrr", "bin", "Release", "net9.0", "pdfbrrr"),
+				FileName = executablePath,
 				Arguments = $"\"{pdfFile}\" --prompt split-happens {(string.IsNullOrEmpty(model) ? "" : $" --model \"{model}\"")}{(string.IsNullOrEmpty(endpoint) ? "" : $" --endpoint \"{endpoint}\"")}{(string.IsNullOrEmpty(apiKey) ? "" : $" --apikey \"{apiKey}\"")}",
 				UseShellExecute = false,
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
 				CreateNoWindow = true,
-				WorkingDirectory = Path.Combine("..", "pdfbrrr") // Set working directory to pdfbrrr directory
+				WorkingDirectory = workingDirectory
 			};
-
-			// Try alternative path for pdfbrrr if the first one doesn't exist
-			if (!File.Exists(startInfo.FileName))
-			{
-				startInfo.FileName = Path.Combine("..", "pdfbrrr", "bin", "Debug", "net9.0", "pdfbrrr");
-			}
-
-			// Try .exe extension on Windows
-			if (!File.Exists(startInfo.FileName) && Environment.OSVersion.Platform == PlatformID.Win32NT)
-			{
-				startInfo.FileName = Path.ChangeExtension(startInfo.FileName, ".exe");
-			}
 
 			LogInfo("Invoking pdfbrrr...", new
 			{
 				executable = startInfo.FileName,
+				workingDirectory = startInfo.WorkingDirectory,
 				model = model ?? "default",
 				endpoint = endpoint ?? "default"
 			});
@@ -327,29 +373,22 @@ class Program
 	{
 		try
 		{
+			var executablePath = FindExecutable("split-happens");
+			if (executablePath == null)
+			{
+				LogError("Could not locate split-happens executable. Please ensure it is built.");
+				return (false, 0, 0);
+			}
+			
 			var startInfo = new ProcessStartInfo
 			{
-				FileName = Path.Combine("..", "split-happens", "bin", "Release", "net9.0", "split-happens"),
+				FileName = executablePath,
 				Arguments = $"--file \"{pdfFile}\" --pattern \"{pattern}\" --output \"{outputDirectory}\"",
 				UseShellExecute = false,
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
 				CreateNoWindow = true
 			};
-
-			// Try alternative path for split-happens if the first one doesn't exist
-
-
-			if (!File.Exists(startInfo.FileName))
-			{
-				startInfo.FileName = Path.Combine("..", "split-happens", "bin", "Debug", "net9.0", "split-happens");
-			}
-
-			// Try .exe extension on Windows
-			if (!File.Exists(startInfo.FileName) && Environment.OSVersion.Platform == PlatformID.Win32NT)
-			{
-				startInfo.FileName = Path.ChangeExtension(startInfo.FileName, ".exe");
-			}
 
 			LogInfo("Invoking split-happens...", new
 			{
