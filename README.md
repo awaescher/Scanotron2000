@@ -4,14 +4,14 @@ Scanotron2000 is a PDF processing orchestrator that combines two powerful tools:
 - [pdfbrrr](https://github.com/awaescher/pdfbrrr) - AI-powered PDF processor
 - [split-happens](https://github.com/awaescher/split-happens) - PDF splitting tool
 
-## How it works
+### How it works
 
 1. Scanotron2000 takes a PDF file as input
 2. It runs `pdfbrrr` on the PDF with the `split-happens` prompt to analyze the document structure and extract a page splitting pattern
 3. It then runs `split-happens` with the original PDF and the pattern to split the document into logical parts
 4. The resulting split PDFs are saved to the specified output directory
 
-# Running precompiled executables
+## Running precompiled executables
 
 > [!WARNING]  
 > Apple is very restrictive when it comes to opening apps from unverified developers. To be able to use this app, you need to manually allow the executable to be run.
@@ -31,29 +31,29 @@ Scanotron2000 is a PDF processing orchestrator that combines two powerful tools:
 >
 > Once you're through, this will last until you download a new version of these apps.
 
-Download the latest executable from the releases page. Use framework dependent, if you have the .NET 9.0 runtime installed. Otherwise chose self-containing.
+Download the latest executable from the releases page. Use framework dependent, if you have the [.NET 9.0 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) installed. Otherwise chose self-containing.
 
 Run `scanotron <pdf-file>`
 
 See [arguments](#arguments) for more flexibility like defining an AI endpoint, an AI model, the output directory and more. 
 
-# Running from source code
+## Running from source code
 
-## Prerequisites
+### Prerequisites
 
-- .NET 9.0 SDK
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - Git (for submodules)
 
-## Getting Started
+### Getting Started
 
-### Clone the repository
+#### Clone the repository
 
 ```bash
 git clone --recurse-submodules https://github.com/your-username/Scanotron2000.git
 cd Scanotron2000
 ```
 
-### Build the projects
+#### Build the projects
 
 ```bash
 # Build pdfbrrr
@@ -72,7 +72,7 @@ dotnet build -c Release
 cd ..
 ```
 
-### Run the application
+#### Run the application
 
 ```bash
 cd scanotron
@@ -84,14 +84,14 @@ Example:
 dotnet run -- ../sample.pdf --output ../output
 ```
 
-## Usage
+### Usage
 
 ```
 scanotron <PDF-file> [--output <output-directory>] [--model <model>] [--endpoint <endpoint>] [--apikey <apikey>] [--force] [--json]
 scanotron -f <PDF-file> [-o <output-directory>] [-m <model>] [-e <endpoint>] [-k <apikey>] [--force] [--json]
 ```
 
-### Arguments
+#### Arguments
 
 - `<PDF-file>` - Path to the PDF file to process
 - `--output, -o` - Optional: Directory where output files will be saved (default: folder with the same name next to the input PDF)
@@ -101,13 +101,13 @@ scanotron -f <PDF-file> [-o <output-directory>] [-m <model>] [-e <endpoint>] [-k
 - `--force` - Optional: Force regenerate pattern, ignore cached .brrr file
 - `--json` - Optional: Output logs in JSON format for machine processing
 
-### Process
+#### Process
 
 1. Runs pdfbrrr on the PDF with the 'split-happens' prompt to extract a page pattern
    (Pattern is cached in a .brrr file for future runs)
 2. Runs split-happens on the PDF using the pattern to split the document
 
-### Logging Modes
+#### Logging Modes
 
 **Human-readable mode (default):**
 - Clear visual separation with section dividers
@@ -121,7 +121,7 @@ scanotron -f <PDF-file> [-o <output-directory>] [-m <model>] [-e <endpoint>] [-k
 - Perfect for parsing and automation
 - Fields: `timestamp`, `level`, `message`, `data`
 
-## Example
+### Example
 
 ```bash
 # Process a PDF file and save results to default output directory
@@ -174,7 +174,3 @@ Use the `--force` flag to regenerate the pattern when:
    split-happens --file [PDF-file] --pattern [pattern-from-pdfbrrr] --output [output-directory]
    ```
    This splits the PDF according to the pattern and saves the parts to the output directory.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
