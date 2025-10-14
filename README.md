@@ -13,7 +13,7 @@ Scanotron2000 is a PDF processing orchestrator that combines two powerful tools:
 
 ## Running precompiled executables
 
-> [!WARNING]  
+> [!WARNING]
 > Apple is very restrictive when it comes to opening apps from unverified developers. To be able to use this app, you need to manually allow the executable to be run.
 >
 > That means:
@@ -26,7 +26,7 @@ Scanotron2000 is a PDF processing orchestrator that combines two powerful tools:
 >   7. Run the app a third time, this time it should work
 >
 > More details here: https://support.apple.com/en-us/guide/mac-help/mh40616/mac
-> 
+>
 > The bad news: You need to do this not only once but three times: for **scanotron**, **pdfbrrr** and **split-happens**.
 >
 > Once you're through, this will last until you download a new version of these apps.
@@ -35,7 +35,7 @@ Download the latest executable from the releases page. Use framework dependent, 
 
 Run `scanotron <pdf-file>`
 
-See [arguments](#arguments) for more flexibility like defining an AI endpoint, an AI model, the output directory and more. 
+See [arguments](#arguments) for more flexibility like defining an AI endpoint, an AI model, the output directory and more.
 
 ## Running from source code
 
@@ -88,13 +88,13 @@ dotnet run -- ../sample.pdf --output ../output
 
 ```
 scanotron <PDF-file> [--output <output-directory>] [--model <model>] [--endpoint <endpoint>] [--apikey <apikey>] [--force] [--json]
-scanotron -f <PDF-file> [-o <output-directory>] [-m <model>] [-e <endpoint>] [-k <apikey>] [--force] [--json]
+scanotron <PDF-file> [-o <output-directory>] [-m <model>] [-e <endpoint>] [-k <apikey>] [--force] [--json]
 ```
 
 #### Arguments
 
 - `<PDF-file>` - Path to the PDF file to process
-- `--output, -o` - Optional: Directory where output files will be saved (default: folder with the same name next to the input PDF)
+- `--output, -o` - Optional: Directory where output files will be saved (default: folder with the same name as the PDF, without extension, next to the input PDF)
 - `--model, -m` - Optional: Model name to use for AI processing
 - `--endpoint, -e` - Optional: API endpoint URL [default: http://localhost:1234]
 - `--apikey, -k` - Optional: API key (can also use API_KEY env var)
@@ -143,9 +143,9 @@ dotnet run -- document.pdf --model gpt-4 --endpoint https://api.openai.com --api
 
 **Example with default output:**
 - Input: `/home/user/documents/invoice.pdf`
-- Output: `/home/user/documents/invoice-split/`
-  - `invoice-split/invoice 1.pdf`
-  - `invoice-split/invoice 2+3.pdf`
+- Output: `/home/user/documents/invoice/`
+  - `invoice 1.pdf`
+  - `invoice 2+3.pdf`
   - etc.
 
 ### Pattern Caching
